@@ -17,6 +17,7 @@
             <GradientStop Color="#FF3BD7FF" Offset="0.6"/>
             <GradientStop Color="#FF7A3BFF" Offset="0.8"/>
             <GradientStop Color="#FFFF3BD7" Offset="1"/>
+            
         </LinearGradientBrush>
 
         <Style x:Key="NeonBtn" TargetType="Button">
@@ -149,7 +150,7 @@
             <Rectangle Height="110"
                        VerticalAlignment="Top"
                        Fill="Transparent"
-                       MouseLeftButtonDown="DragBar_MouseLeftButtonDown"/>
+                       MouseLeftButtonDown="DragBar_MouseLeftButtonDown" Margin="0,0,96,0"/>
 
         </Grid>
     </Border>

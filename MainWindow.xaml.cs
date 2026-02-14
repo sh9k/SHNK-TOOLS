@@ -13,6 +13,14 @@ namespace SHNK.Tools.App
         {
             InitializeComponent();
             Logger.Init();
+            Loaded += async (_, __) =>
+            {
+                await Updater.CheckAndPromptAsync(
+                    (title, msg) => MessageBox.Show(msg, title, MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes,
+                    (m) => Logger.Log(m)
+                );
+            };
+
             Logger.Log("SHNK TOOLS started.");
         }
 
