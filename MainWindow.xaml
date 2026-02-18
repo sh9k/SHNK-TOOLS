@@ -9,17 +9,20 @@
         AllowsTransparency="True"
         Background="Transparent">
 
+    <!-- إذا عندك app.ico رجّع سطر Icon هذا:
+         Icon="pack://siteoforigin:,,,/Assets/app.ico"
+    -->
+
     <Window.Resources>
+
+        <!-- RGB Stroke (نسمّي الستوبات حتى نحرّكها من Window.Triggers) -->
         <LinearGradientBrush x:Key="RgbStroke" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#FFFF3B3B" Offset="0"/>
-            <GradientStop Color="#FFFFD93B" Offset="0.2"/>
-            <GradientStop Color="#FF3BFF7A" Offset="0.4"/>
-            <GradientStop Color="#FF3BD7FF" Offset="0.6"/>
-            <GradientStop Color="#FF7A3BFF" Offset="0.8"/>
-            <GradientStop Color="#FFFF3BD7" Offset="1"/>
-            
+            <GradientStop x:Name="S0" Color="#FFFF3B3B" Offset="0.00"/>
+            <GradientStop x:Name="S1" Color="#FF3BD7FF" Offset="0.50"/>
+            <GradientStop x:Name="S2" Color="#FF7A3BFF" Offset="1.00"/>
         </LinearGradientBrush>
 
+        <!-- زر نيون + hover/press -->
         <Style x:Key="NeonBtn" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="20"/>
@@ -30,51 +33,126 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="18"
-                                BorderThickness="2"
-                                BorderBrush="{StaticResource RgbStroke}">
+                        <Border x:Name="Outer"
+                        CornerRadius="18"
+                        BorderThickness="2">
+                            <Border.BorderBrush>
+                                <!-- نفس الـ RGB بس داخل القالب (مهم) -->
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop x:Name="G0" Color="#FFFF3B3B" Offset="0.00"/>
+                                    <GradientStop x:Name="G1" Color="#FF3BD7FF" Offset="0.50"/>
+                                    <GradientStop x:Name="G2" Color="#FF7A3BFF" Offset="1.00"/>
+                                </LinearGradientBrush>
+                            </Border.BorderBrush>
+
                             <Border.Effect>
-                                <DropShadowEffect Color="#FF00E5FF"
-                                                  BlurRadius="25"
-                                                  ShadowDepth="0"
-                                                  Opacity="0.7"/>
+                                <DropShadowEffect Color="#FF00E5FF" BlurRadius="22" ShadowDepth="0" Opacity="0.65"/>
                             </Border.Effect>
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
+
+                            <Border Margin="2" CornerRadius="16" Background="#22000000" BorderBrush="#44FFFFFF" BorderThickness="1">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
                         </Border>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Animation شغال 100% لأن TargetName داخل نفس القالب -->
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                        <DoubleAnimation Storyboard.TargetName="G0" Storyboard.TargetProperty="Offset"
+                                                 From="0.00" To="1.00" Duration="0:0:2.6"/>
+                                        <DoubleAnimation Storyboard.TargetName="G1" Storyboard.TargetProperty="Offset"
+                                                 From="0.50" To="0.00" Duration="0:0:2.6"/>
+                                        <DoubleAnimation Storyboard.TargetName="G2" Storyboard.TargetProperty="Offset"
+                                                 From="1.00" To="0.25" Duration="0:0:2.6"/>
+
+                                        <ColorAnimation Storyboard.TargetName="G0" Storyboard.TargetProperty="Color"
+                                                From="#FFFF3B3B" To="#FF3BFF7A" Duration="0:0:2.6"/>
+                                        <ColorAnimation Storyboard.TargetName="G1" Storyboard.TargetProperty="Color"
+                                                From="#FF3BD7FF" To="#FFFFD93B" Duration="0:0:2.6"/>
+                                        <ColorAnimation Storyboard.TargetName="G2" Storyboard.TargetProperty="Color"
+                                                From="#FF7A3BFF" To="#FFFF3BD7" Duration="0:0:2.6"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.04" ScaleY="1.04"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.985" ScaleY="0.985"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- أزرار العنوان (min/close) -->
+        <Style x:Key="TitleBtn" TargetType="Button">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Foreground" Value="#DDFFFFFF"/>
+            <Setter Property="Background" Value="#22000000"/>
+            <Setter Property="BorderBrush" Value="#55FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
     </Window.Resources>
+
+    <!-- RGB Animation الصحيح (هنا مكانه) -->
+   
 
     <Border CornerRadius="24"
             BorderThickness="4"
             BorderBrush="{StaticResource RgbStroke}">
         <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="917*"/>
+                <ColumnDefinition Width="55*"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- الخلفية -->
-            <Image Source="Assets/ui_bg.jpg" Stretch="Fill"/>
-            <Rectangle Fill="#66000000"/>
+            <!-- الخلفية (مضمونة بعد Publish) -->
+            <Image Source="pack://siteoforigin:,,,/Assets/ui_bg.jpg" Stretch="Fill" Grid.ColumnSpan="2"/>
+            <Rectangle Fill="#66000000" Grid.ColumnSpan="2"/>
 
-            <!-- أزرار العنوان -->
-            <Grid Height="45" VerticalAlignment="Top">
+            <!-- Top bar فوق كلشي -->
+            <Grid Height="45" VerticalAlignment="Top" Panel.ZIndex="999" Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="110"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Horizontal"
-                            Grid.Column="1"
-                            HorizontalAlignment="Right"
-                            Margin="0,8,12,0"
-                            Panel.ZIndex="50">
+                <!-- Drag only on left side (ما يغطي الأزرار) -->
+                <Border Grid.Column="0"
+                        Background="Transparent"
+                        MouseLeftButtonDown="DragBar_MouseLeftButtonDown"/>
 
-                    <Button Width="36" Height="26"
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,8,12,0">
+                    <Button Style="{StaticResource TitleBtn}"
                             Content="—"
                             Click="Minimize_Click"/>
 
-                    <Button Width="36" Height="26"
+                    <Button Style="{StaticResource TitleBtn}"
                             Margin="8,0,0,0"
                             Content="✕"
                             Click="Close_Click"/>
@@ -86,71 +164,85 @@
                        FontSize="42"
                        FontWeight="Bold"
                        Foreground="White"
-                       HorizontalAlignment="Center"
-                       Margin="0,55,0,0"/>
+                       HorizontalAlignment="Left"
+                       Margin="356,55,0,0"/>
 
             <!-- الأزرار -->
-            <Grid VerticalAlignment="Center">
+            <!-- الأزرار -->
+            <Grid VerticalAlignment="Top" Margin="0,180,0,0" Grid.ColumnSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="28"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
+                <!-- الصف العلوي: 4 أزرار -->
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="26"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="26"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0"
-                            Width="300" Height="80"
-                            Style="{StaticResource NeonBtn}"
-                            Content="Cleaner Gameloop"
-                            Click="Cleaner_Click" Margin="32,0,2,0" Grid.ColumnSpan="2"/>
+                    <Button Grid.Column="0" Height="82" Margin="42,0,223,0"
+                Style="{StaticResource NeonBtn}"
+                Content="Cleaner Gameloop"
+                Click="Cleaner_Click" Grid.ColumnSpan="3"/>
 
-                    <Button Grid.Column="2"
-                            Width="200" Height="80"
-                            Style="{StaticResource NeonBtn}"
-                            Content="Fix Gl"
-                            Click="FixGl_Click"/>
+                    <Button Grid.Column="2" Height="82" Width="175"
+                Style="{StaticResource NeonBtn}"
+                Content="Fix Gl"
+                Click="FixGl_Click"/>
 
-                    <Button Grid.Column="4"
-                            Width="200" Height="80"
-                            Style="{StaticResource NeonBtn}"
-                            Content="Fix Kr"
-                            Click="FixKr_Click"/>
+                    <Button Grid.Column="4" Height="82" Width="175"
+                Style="{StaticResource NeonBtn}"
+                Content="Fix Kr"
+                Click="FixKr_Click"/>
+
+                    <Button Grid.Column="6" Height="82" Margin="12,0,16,0"
+                Style="{StaticResource NeonBtn}"
+                Content="Clear Temp + Cache"
+                Click="ClearTemp_Click"/>
                 </Grid>
 
+                <!-- الصف السفلي: 4 أزرار -->
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="26"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0"
-                            Width="360" Height="85"
-                            Style="{StaticResource NeonBtn}"
-                            Content="Clear Temp + Cache"
-                            Click="ClearTemp_Click" Margin="53,58,53,-58"/>
+                    <Button Grid.Column="0" Height="82" Margin="42,48,223,-48"
+                Style="{StaticResource NeonBtn}"
+                Content="Install Emu 32"
+                Click="Install32_Click" Grid.ColumnSpan="3"/>
 
-                    <Button Grid.Column="2"
-                            Width="360" Height="85"
-                            Style="{StaticResource NeonBtn}"
-                            Content="Install Emu 32"
-                            Click="Install32_Click" Margin="53,58,53,-58"/>
+                    <Button Grid.Column="2" Height="82" Width="175"
+                Style="{StaticResource NeonBtn}"
+                Content="Fix Error Hax"
+                Click="FixErrorHax_Click" Margin="24,48,23,-48"/>
+
+                    <Button Grid.Column="4" Height="82" Width="175"
+                Style="{StaticResource NeonBtn}"
+                Content="Reset Guest"
+                Click="ResetGuest_Click" Margin="24,48,24,-48"/>
+
+                    <Button Grid.Column="5" Height="82" Margin="26,48,16,-48"
+                Style="{StaticResource NeonBtn}"
+                Content="AIO FIX"
+                Click="AioFix_Click" Grid.ColumnSpan="2"/>
                 </Grid>
             </Grid>
 
-            <!-- Drag Area (ما يغطي الأزرار) -->
-            <Rectangle Height="110"
-                       VerticalAlignment="Top"
-                       Fill="Transparent"
-                       MouseLeftButtonDown="DragBar_MouseLeftButtonDown" Margin="0,0,96,0"/>
 
         </Grid>
     </Border>

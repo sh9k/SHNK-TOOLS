@@ -4,7 +4,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-
+using System.Diagnostics;
+using System.IO.Compression;
 namespace SHNK.Tools.App
 {
     public partial class MainWindow : Window
@@ -50,88 +51,72 @@ namespace SHNK.Tools.App
             MessageBox.Show("Cleaner finished. Check logs.", "SHNK TOOLS");
         }
 
-        private async void FixGl_Click(object sender, RoutedEventArgs e)
+       private void FixGl_Click(object sender, RoutedEventArgs e)
+{
+    var uiPath = GameLoopFinder.FindUiPath();
+    if (uiPath == null)
+    {
+        MessageBox.Show("Gameloop path not found.", "SHNK TOOLS");
+        return;
+    }
+
+    try
+    {
+        // حذف ملف hosts
+        string hostsPath = @"C:\Windows\System32\drivers\etc\hosts";
+        if (File.Exists(hostsPath))
+            File.Delete(hostsPath);
+
+        // نسخ ملفات الإصلاح
+        string source = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "fix_gl", "ui");
+
+        foreach (var file in Directory.GetFiles(source))
         {
-            var root = await Task.Run(GameLoopFinder.DetectGameLoopRoot);
-            if (root == null)
-            {
-                MessageBox.Show("GameLoop path not found.", "SHNK TOOLS");
-                return;
-            }
-
-            var uiTarget = Path.Combine(root, "TxGameAssistant", "UI");
-            var uiSource = Paths.Asset(@"Assets\fix_gl\ui");
-
-            if (!Directory.Exists(uiSource))
-            {
-                MessageBox.Show(@"Missing GL fix files folder: Assets\fix_gl\ui", "SHNK TOOLS");
-                return;
-            }
-
-            if (!Confirm($"Detected GameLoop:\n{root}\n\nFixGl will:\n- Backup & delete hosts\n- Copy GL UI files to:\n{uiTarget}\n\nContinue?"))
-                return;
-
-            try
-            {
-                Logger.Log($"FixGl root: {root}");
-                HostsOps.DeleteHostsWithBackup();
-                Directory.CreateDirectory(uiTarget);
-                FileOps.CopyDirectory(uiSource, uiTarget, overwrite: true);
-                Logger.Log("FixGl applied.");
-                MessageBox.Show("FixGl done.", "SHNK TOOLS");
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("FixGl ERROR: " + ex);
-                MessageBox.Show("FixGl failed. Check logs.", "SHNK TOOLS");
-            }
+            var dest = System.IO.Path.Combine(uiPath, System.IO.Path.GetFileName(file));
+            File.Copy(file, dest, true);
         }
 
-        private async void FixKr_Click(object sender, RoutedEventArgs e)
+        MessageBox.Show("Fix GL Completed.", "SHNK TOOLS");
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show(ex.Message, "Error");
+    }
+}
+
+       private void FixKr_Click(object sender, RoutedEventArgs e)
+{
+    var uiPath = GameLoopFinder.FindUiPath();
+    if (uiPath == null)
+    {
+        MessageBox.Show("Gameloop path not found.", "SHNK TOOLS");
+        return;
+    }
+
+    try
+    {
+        // نسخ hosts من Assets
+        string hostsSource = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "fix_kr", "hosts");
+        string hostsDest = @"C:\Windows\System32\drivers\etc\hosts";
+
+        if (File.Exists(hostsSource))
+            File.Copy(hostsSource, hostsDest, true);
+
+        // فك KR.zip إذا موجود
+        string zipPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "fix_kr", "KR.zip");
+        if (File.Exists(zipPath))
         {
-            var root = await Task.Run(GameLoopFinder.DetectGameLoopRoot);
-            if (root == null)
-            {
-                MessageBox.Show("GameLoop path not found.", "SHNK TOOLS");
-                return;
-            }
-
-            var uiTarget = Path.Combine(root, "TxGameAssistant", "UI");
-            var krZip = Paths.Asset(@"Assets\fix_kr\KR.zip");
-            var krHosts = Paths.Asset(@"Assets\fix_kr\hosts");
-
-            if (!File.Exists(krZip))
-            {
-                MessageBox.Show(@"Missing: Assets\fix_kr\KR.zip", "SHNK TOOLS");
-                return;
-            }
-            if (!File.Exists(krHosts))
-            {
-                MessageBox.Show(@"Missing: Assets\fix_kr\hosts", "SHNK TOOLS");
-                return;
-            }
-
-            if (!Confirm($"Detected GameLoop:\n{root}\n\nFixKr will:\n- Backup & replace hosts\n- Extract KR.zip and copy files to:\n{uiTarget}\n\nContinue?"))
-                return;
-
-            try
-            {
-                Logger.Log($"FixKr root: {root}");
-                HostsOps.ReplaceHostsWithBackup(krHosts);
-
-                var extracted = ZipOps.ExtractToCache(krZip, "kr_fix");
-                Directory.CreateDirectory(uiTarget);
-                FileOps.CopyDirectory(extracted, uiTarget, overwrite: true);
-
-                Logger.Log("FixKr applied.");
-                MessageBox.Show("FixKr done.", "SHNK TOOLS");
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("FixKr ERROR: " + ex);
-                MessageBox.Show("FixKr failed. Check logs.", "SHNK TOOLS");
-            }
+            System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, uiPath, true);
         }
+
+        MessageBox.Show("Fix KR Completed.", "SHNK TOOLS");
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show(ex.Message, "Error");
+    }
+}
+
 
         private async void ClearTemp_Click(object sender, RoutedEventArgs e)
         {
@@ -205,6 +190,96 @@ namespace SHNK.Tools.App
                 MessageBox.Show("Install failed. Check logs.", "SHNK TOOLS");
             }
         }
+        // =========================
+        // NEW BUTTONS (Fix Error Hax / Reset Guest / AIO FIX)
+        // =========================
+
+        private const string FixErrorHaxUrl =
+            "https://aka.ms/vs/16/release/vc_redist.x64.exe";
+
+        private const string AioFixUrl =
+            "https://allinoneruntimes.org/files/aio-runtimes_v2.5.0.exe";
+
+        private static string GetCacheDir()
+        {
+            var dir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "SHNK Tools", "cache");
+
+            Directory.CreateDirectory(dir);
+            return dir;
+        }
+
+        private static void RunAsAdmin(string exePath)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = exePath,
+                UseShellExecute = true,
+                Verb = "runas"
+            });
+        }
+
+        private async void FixErrorHax_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Confirm("Fix Error Hax will download & run Microsoft VC++ Redistributable (x64).\nContinue?")) return;
+
+            try
+            {
+                var dest = Path.Combine(GetCacheDir(), "vc_redist.x64.exe");
+
+                Logger.Log("Fix Error Hax: Downloading...");
+                await Downloader.DownloadFileAsync(FixErrorHaxUrl, dest);
+
+                if (!File.Exists(dest)) throw new Exception("Download failed.");
+
+                Logger.Log("Fix Error Hax: Running as admin...");
+                RunAsAdmin(dest);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Fix Error Hax ERROR: " + ex);
+                MessageBox.Show(ex.Message, "Error");
+            }
+        }
+
+        private async void AioFix_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Confirm("AIO FIX will download & run AIO Runtimes installer.\nContinue?")) return;
+
+            try
+            {
+                var dest = Path.Combine(GetCacheDir(), "aio-runtimes.exe");
+
+                Logger.Log("AIO FIX: Downloading...");
+                await Downloader.DownloadFileAsync(AioFixUrl, dest);
+
+                if (!File.Exists(dest)) throw new Exception("Download failed.");
+
+                Logger.Log("AIO FIX: Running as admin...");
+                RunAsAdmin(dest);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("AIO FIX ERROR: " + ex);
+                MessageBox.Show(ex.Message, "Error");
+            }
+        }
+
+        private void ResetGuest_Click(object sender, RoutedEventArgs e)
+        {
+            // نافذة Reset Guest لازم تضيفها (ResetGuestWindow.xaml)
+            var w = new ResetGuestWindow { Owner = this };
+            w.OnPick = (region) =>
+            {
+                Logger.Log("Reset Guest selected: " + region);
+
+                // هنا تربط أوامرك الخاصة لكل Region (GL/KR/VNG/TW)
+                MessageBox.Show($"Selected: {region}\nNow send me your commands (GL/KR/VNG/TW) to run them.", "SHNK TOOLS");
+            };
+            w.ShowDialog();
+        }
+
 
         private static bool Confirm(string msg) =>
             MessageBox.Show(msg, "SHNK TOOLS", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
