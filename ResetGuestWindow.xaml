@@ -2,29 +2,26 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Reset Guest"
-        Width="154" Height="118"
+        Width="250" Height="250"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         WindowStyle="ToolWindow"
         Background="#111111">
 
-    <Grid Margin="16">
+    <Grid Margin="16,-5,16,37">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="16"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Reset Guest"
-                   Foreground="White"
-                   FontSize="18"
-                   FontWeight="SemiBold"/>
 
-        <UniformGrid Grid.Row="2" Columns="4" Rows="1">
-            <Button Content="GL" Margin="6,6,6,3" Click="Gl_Click"/>
-            <Button Content="KR" Margin="6,6,6,3" Click="Kr_Click" RenderTransformOrigin="0.448,-0.243"/>
-            <Button Content="VNG" Margin="6,6,4,3" Click="Vng_Click"/>
-            <Button Content="TW" Margin="6,6,0,3" Click="Tw_Click"/>
+
+        <UniformGrid Columns="4" Rows="1" Margin="-2,3,-2,3" Grid.Row="1" Grid.RowSpan="2">
+            <Button Content="GL" Margin="6,63,6,87" Click="Gl_Click"/>
+            <Button Content="KR" Margin="3,63,12,87" Click="Kr_Click"/>
+            <Button Content="VNG" Margin="-2,63,8,87" Click="Vng_Click"/>
+            <Button Content="TW" Margin="2,63,4,87" Click="Tw_Click"/>
         </UniformGrid>
     </Grid>
 </Window>
