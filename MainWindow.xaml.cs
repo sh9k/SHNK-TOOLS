@@ -310,7 +310,13 @@ namespace SHNK.Tools.App
                     return;
                 }
 
-                if (!ConfirmDanger($"Reset Guest ({region}) will run:\n{bat}\n\nContinue?")) return;
+                if (!ConfirmDanger(
+     $"⚠ Reset Guest ({region}) Will Run Now?\n\n" +
+     "• ADB will restart\n" +
+     "• Device ID will be refreshed\n" +
+     "• Game data will be cleaned\n\n" +
+     "Proceed?"
+ )) return;
 
                 Logger.Log($"ResetGuest: Running {region}.bat ...");
                 await ScriptRunner.RunBatWithLiveLog(bat);
