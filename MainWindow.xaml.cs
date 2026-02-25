@@ -191,7 +191,12 @@ namespace SHNK.Tools.App
                 return;
             }
 
-            if (!Confirm($"Download & run 32-bit installer?\n\nURL:\n{cfg.Emu32InstallerUrl}")) return;
+            if (!Confirm(
+     "Download & run 32-bit installer now?\n\n" +
+     "• Official installer will be downloaded\n" +
+     "• Setup will start automatically\n\n" +
+     "Continue?"
+ )) return;
 
             try
             {
