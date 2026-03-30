@@ -29709,6 +29709,32 @@
 </KeyMapMode>
 </Item>
 
+<Item ApkName="com.tencent.tmgp.m3gsy" 备注="梦三国">
+<StartInfo StartTimes="8"/>
+<LastMode ModeID="1" EnableTips="0" EnableGameKeyDT="0" TipsTransparent="0.500000" Lightness="1.000000" EnableSwitchViewLockMethod="0"/>
+<KeyMapMode ModeID="1" Name="普通模式" CurrModeEnableTips="1" KeyboardPassThrough="0">
+<KeyMapping ItemName="Tab" Point_X="0.848611" Point_Y="0.157407" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="9"/>
+<KeyMapping ItemName="Shift" Point_X="0.966667" Point_Y="0.057407" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="16"/>
+<KeyMapping ItemName="Ctrl" Point_X="0.963542" Point_Y="0.406790" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="17"/>
+<KeyMapping ItemName="空格" Point_X="0.887153" Point_Y="0.836420" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="32"/>
+<KeyMapping ItemName="1" Point_X="0.908333" Point_Y="0.185185" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="49"/>
+<KeyMapping ItemName="2" Point_X="0.910069" Point_Y="0.290741" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="50"/>
+<KeyMapping ItemName="3" Point_X="0.072917" Point_Y="0.420370" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="51"/>
+<KeyMapping ItemName="4" Point_X="0.117708" Point_Y="0.424074" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="52"/>
+<KeyMapping ItemName="5" Point_X="0.160417" Point_Y="0.422222" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="53"/>
+<KeyMapping ItemName="B" Point_X="0.459375" Point_Y="0.743827" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="66"/>
+<KeyMapping ItemName="C" Point_X="0.645833" Point_Y="0.685185" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="67"/>
+<KeyMapping ItemName="E" Point_X="0.744792" Point_Y="0.716667" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="69"/>
+<KeyMapping ItemName="F" Point_X="0.798958" Point_Y="0.906790" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="70"/>
+<KeyMapping ItemName="G" Point_X="0.926042" Point_Y="0.681481" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="71"/>
+<KeyMapping ItemName="Q" Point_X="0.712500" Point_Y="0.877778" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="81"/>
+<KeyMapping ItemName="R" Point_X="0.811111" Point_Y="0.595679" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="82"/>
+<KeyMapping ItemName="T" Point_X="0.915278" Point_Y="0.536420" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="84"/>
+<KeyMapping ItemName="V" Point_X="0.537500" Point_Y="0.740741" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="86"/>
+<KeyMapping ItemName="Z" Point_X="0.301042" Point_Y="0.875926" Description="字母键" MiniVisiable="true" MiniDisable="false" AutoCancel="0" AsciiCode="90"/>
+<KeyMappingEx ItemName="WASD" Point_X="0.132986" Point_Y="0.762346" Description="移动" MiniVisiable="false" MiniDisable="false" AutoCancel="0" Type="CrossKey" speed="0" UP_AsciiCode="87" DOWN_AsciiCode="83" LEFT_AsciiCode="65" RIGHT_AsciiCode="68" Offset="0.076282"/>
+</KeyMapMode>
+</Item>
 <Item ApkName="com.tencent.tmgp.xianyugame.srzg" 备注="塞尔之光">
 <KeyMapMode ModeID="1" Name="普通模式">
 <KeyMapping ItemName="Tab" Point_X="0.729492" Point_Y="0.592014" Description="字母键" AsciiCode="9"/>
