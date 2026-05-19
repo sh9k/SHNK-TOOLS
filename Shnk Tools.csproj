@@ -9,16 +9,17 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<ApplicationIcon>Assets\app.ico</ApplicationIcon>
 
-		<Version>1.0.9</Version>
-		<AssemblyVersion>1.0.9.0</AssemblyVersion>
-		<FileVersion>1.0.9.0</FileVersion>
+		<!-- VERSION -->
+		<Version>2.0.0</Version>
+		<AssemblyVersion>2.0.0.0</AssemblyVersion>
+		<FileVersion>2.0.0.0</FileVersion>
 
 		<!-- SINGLE EXE -->
 		<PublishSingleFile>true</PublishSingleFile>
 		<SelfContained>true</SelfContained>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
-		<!-- ضغط وتقليل الحجم -->
+		<!-- ضغط -->
 		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
 
 		<!-- تضمين كل الملفات -->
@@ -37,22 +38,20 @@
 
 	<ItemGroup>
 
-		<!-- حذف Content القديم -->
+		<!-- حذف Content التقليدي -->
 		<Content Remove="Assets\**\*.*" />
 		<Content Remove="Config\**\*.*" />
 
-		<!-- تضمين داخل EXE -->
+		<!-- تضمين كل Assets داخل EXE -->
 		<EmbeddedResource Include="Assets\**\*.*" />
+
+		<!-- تضمين Config -->
 		<EmbeddedResource Include="Config\**\*.*" />
 
-	</ItemGroup>
+		<!-- صورة الخلفية WPF Resource -->
+		<EmbeddedResource Remove="Assets\ui_bg.jpg" />
+		<Resource Include="Assets\ui_bg.jpg" />
 
-	<ItemGroup>
-	  <EmbeddedResource Remove="Assets\ui_bg.jpg" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Resource Include="Assets\ui_bg.jpg" />
 	</ItemGroup>
 
 </Project>
