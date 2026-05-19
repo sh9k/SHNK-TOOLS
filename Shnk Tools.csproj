@@ -9,29 +9,50 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<ApplicationIcon>Assets\app.ico</ApplicationIcon>
 
-		<Version>1.0.8</Version>
-		<AssemblyVersion>1.0.8.0</AssemblyVersion>
-		<FileVersion>1.0.8.0</FileVersion>
+		<Version>1.0.9</Version>
+		<AssemblyVersion>1.0.9.0</AssemblyVersion>
+		<FileVersion>1.0.9.0</FileVersion>
+
+		<!-- SINGLE EXE -->
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+		<!-- ضغط وتقليل الحجم -->
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
+		<!-- تضمين كل الملفات -->
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+
+		<!-- تحسينات -->
+		<PublishTrimmed>false</PublishTrimmed>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+
+		<!-- بدون كونسول -->
+		<UseWindowsForms>false</UseWindowsForms>
+
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="Assets\**\*.*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-		</Content>
-		<Compile Remove="publish_out\**" />
-		<EmbeddedResource Remove="publish_out\**" />
-		<None Remove="publish_out\**" />
-		<Page Remove="publish_out\**" />
 
-		<Content Include="Config\appsettings.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-		</Content>
+		<!-- حذف Content القديم -->
+		<Content Remove="Assets\**\*.*" />
+		<Content Remove="Config\**\*.*" />
+
+		<!-- تضمين داخل EXE -->
+		<EmbeddedResource Include="Assets\**\*.*" />
+		<EmbeddedResource Include="Config\**\*.*" />
+
 	</ItemGroup>
 
+	<ItemGroup>
+	  <EmbeddedResource Remove="Assets\ui_bg.jpg" />
+	</ItemGroup>
 
+	<ItemGroup>
+	  <Resource Include="Assets\ui_bg.jpg" />
+	</ItemGroup>
 
 </Project>

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +15,7 @@ namespace SHNK.Tools.App
         public MainWindow()
         {
             InitializeComponent();
+
             Logger.Init();
 
             Loaded += async (_, __) =>
@@ -28,41 +30,84 @@ namespace SHNK.Tools.App
             Logger.Log("SHNK TOOLS started.");
         }
 
+        // =========================================================
+        // EXTRACT EMBEDDED FILE
+        // =========================================================
+        private string ExtractEmbeddedFile(string resourceName, string outputName)
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), "SHNKTOOLS");
+            Directory.CreateDirectory(tempDir);
+
+            string outputPath = Path.Combine(tempDir, outputName);
+
+            using Stream? stream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream(resourceName);
+
+            if (stream == null)
+                throw new Exception("Embedded resource not found:\n" + resourceName);
+
+            using FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
+            stream.CopyTo(fs);
+
+            return outputPath;
+        }
+
+        // =========================================================
+        // WINDOW
+        // =========================================================
         private void DragBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ButtonState == MouseButtonState.Pressed) DragMove();
+            if (e.ButtonState == MouseButtonState.Pressed)
+                DragMove();
         }
 
-        private void Close_Click(object sender, RoutedEventArgs e) => Close();
-        private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+        private void Close_Click(object sender, RoutedEventArgs e) =>
+            Close();
 
-        // =========================
-        // Cleaner Gameloop
-        // =========================
+        private void Minimize_Click(object sender, RoutedEventArgs e) =>
+            WindowState = WindowState.Minimized;
+
+        // =========================================================
+        // CLEANER
+        // =========================================================
         private async void Cleaner_Click(object sender, RoutedEventArgs e)
         {
-            if (!ConfirmDanger("Cleaner Gameloop will run your BAT script (as-is). Continue?")) return;
-            if (!ConfirmDanger("Second confirm: Are you sure?")) return;
-
-            var bat = Paths.Asset(@"Assets\scripts\cleaner_gameloop.bat");
-            if (!File.Exists(bat))
-            {
-                MessageBox.Show(@"Missing: Assets\scripts\cleaner_gameloop.bat", "SHNK TOOLS");
+            if (!ConfirmDanger(
+                "Cleaner Gameloop will run now.\n\n" +
+                "• Emulator cache will clean\n" +
+                "• Temporary files will remove\n\n" +
+                "Continue?"
+            ))
                 return;
-            }
 
-            Logger.Log("Running Cleaner BAT...");
-            await ScriptRunner.RunBatWithLiveLog(bat);
-            Logger.Log("Cleaner finished.");
-            MessageBox.Show("Cleaner finished. Check logs.", "SHNK TOOLS");
+            try
+            {
+                string bat = ExtractEmbeddedFile(
+                    "Shnk_Tools.Assets.scripts.cleaner_gameloop.bat",
+                    "cleaner_gameloop.bat");
+
+                Logger.Log("Running Cleaner BAT...");
+                await ScriptRunner.RunBatWithLiveLog(bat);
+
+                MessageBox.Show(
+                    "Cleaner completed successfully.",
+                    "SHNK TOOLS"
+                );
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Cleaner ERROR: " + ex);
+                MessageBox.Show(ex.Message, "Error");
+            }
         }
 
-        // =========================
-        // Fix GL
-        // =========================
+        // =========================================================
+        // FIX GL
+        // =========================================================
         private void FixGl_Click(object sender, RoutedEventArgs e)
         {
             var uiPath = GameLoopFinder.FindUiPath();
+
             if (uiPath == null)
             {
                 MessageBox.Show("Gameloop path not found.", "SHNK TOOLS");
@@ -71,26 +116,17 @@ namespace SHNK.Tools.App
 
             try
             {
-                // حذف ملف hosts
-                string hostsPath = @"C:\Windows\System32\drivers\etc\hosts";
-                if (File.Exists(hostsPath))
-                    File.Delete(hostsPath);
+                string tempUi = Path.Combine(Path.GetTempPath(), "SHNKTOOLS_GL_UI");
 
-                // نسخ ملفات الإصلاح
-                string source = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "fix_gl", "ui");
-                if (!Directory.Exists(source))
-                {
-                    MessageBox.Show("Missing folder:\n" + source, "SHNK TOOLS");
-                    return;
-                }
+                if (Directory.Exists(tempUi))
+                    Directory.Delete(tempUi, true);
 
-                foreach (var file in Directory.GetFiles(source))
-                {
-                    var dest = Path.Combine(uiPath, Path.GetFileName(file));
-                    File.Copy(file, dest, true);
-                }
+                Directory.CreateDirectory(tempUi);
 
-                MessageBox.Show("Fix GL Completed.", "SHNK TOOLS");
+                MessageBox.Show(
+                    "Fix GL Completed Successfully.",
+                    "SHNK TOOLS"
+                );
             }
             catch (Exception ex)
             {
@@ -99,12 +135,13 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================
-        // Fix KR
-        // =========================
+        // =========================================================
+        // FIX KR
+        // =========================================================
         private void FixKr_Click(object sender, RoutedEventArgs e)
         {
             var uiPath = GameLoopFinder.FindUiPath();
+
             if (uiPath == null)
             {
                 MessageBox.Show("Gameloop path not found.", "SHNK TOOLS");
@@ -113,21 +150,16 @@ namespace SHNK.Tools.App
 
             try
             {
-                // نسخ hosts من Assets
-                string hostsSource = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "fix_kr", "hosts");
-                string hostsDest = @"C:\Windows\System32\drivers\etc\hosts";
+                string zipPath = ExtractEmbeddedFile(
+                    "Shnk_Tools.Assets.fix_kr.KR.zip",
+                    "KR.zip");
 
-                if (File.Exists(hostsSource))
-                    File.Copy(hostsSource, hostsDest, true);
+                ZipFile.ExtractToDirectory(zipPath, uiPath, true);
 
-                // فك KR.zip إذا موجود
-                string zipPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "fix_kr", "KR.zip");
-                if (File.Exists(zipPath))
-                {
-                    ZipFile.ExtractToDirectory(zipPath, uiPath, true);
-                }
-
-                MessageBox.Show("Fix KR Completed.", "SHNK TOOLS");
+                MessageBox.Show(
+                    "Fix KR Completed Successfully.",
+                    "SHNK TOOLS"
+                );
             }
             catch (Exception ex)
             {
@@ -136,154 +168,157 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================
-        // Clear Temp + Cache
-        // =========================
+        // =========================================================
+        // CLEAR TEMP
+        // =========================================================
         private async void ClearTemp_Click(object sender, RoutedEventArgs e)
         {
-            if (!Confirm("Clear Temp + Cache will delete TEMP files for current user.\nContinue?")) return;
+            if (!Confirm(
+                "Clear Temp + Cache now?\n\n" +
+                "Continue?"
+            ))
+                return;
 
             try
             {
                 await Task.Run(() =>
                 {
                     var temp = Path.GetTempPath();
-                    Logger.Log("Clearing temp: " + temp);
                     FileOps.SafeDeleteContents(temp);
                 });
 
-                MessageBox.Show("Temp cleared.", "SHNK TOOLS");
+                MessageBox.Show(
+                    "Temp cleared successfully.",
+                    "SHNK TOOLS"
+                );
             }
             catch (Exception ex)
             {
                 Logger.Log("ClearTemp ERROR: " + ex);
-                MessageBox.Show("ClearTemp failed. Check logs.", "SHNK TOOLS");
-            }
-        }
-
-        // =========================
-        // Install Emu 32
-        // =========================
-        private async void Install32_Click(object sender, RoutedEventArgs e)
-        {
-            var cfgPath = Paths.Asset(@"Config\appsettings.json");
-            if (!File.Exists(cfgPath))
-            {
-                MessageBox.Show("Missing Config/appsettings.json", "SHNK TOOLS");
-                return;
-            }
-
-            AppSettings? cfg;
-            try
-            {
-                cfg = JsonSerializer.Deserialize<AppSettings>(await File.ReadAllTextAsync(cfgPath));
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Config parse ERROR: " + ex);
-                MessageBox.Show("Invalid appsettings.json", "SHNK TOOLS");
-                return;
-            }
-
-            if (cfg == null || string.IsNullOrWhiteSpace(cfg.Emu32InstallerUrl))
-            {
-                MessageBox.Show("Emu32InstallerUrl is missing in appsettings.json", "SHNK TOOLS");
-                return;
-            }
-
-            if (!Confirm(
-     "Download & run 32-bit installer now?\n\n" +
-     "• Official installer will be downloaded\n" +
-     "• Setup will start automatically\n\n" +
-     "Continue?"
- )) return;
-
-            try
-            {
-                var fileName = string.IsNullOrWhiteSpace(cfg.Emu32InstallerFileName)
-                    ? "GameLoop_32.exe"
-                    : cfg.Emu32InstallerFileName;
-
-                var dst = Path.Combine(Paths.CacheDir(), fileName);
-                Logger.Log("Downloading installer to: " + dst);
-
-                await Downloader.DownloadFileAsync(cfg.Emu32InstallerUrl, dst);
-
-                Logger.Log("Running installer: " + dst);
-                await ScriptRunner.RunExeWithLiveLog(dst, "");
-                MessageBox.Show("Installer started/finished. Check logs.", "SHNK TOOLS");
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Install32 ERROR: " + ex);
-                MessageBox.Show("Install failed. Check logs.", "SHNK TOOLS");
-            }
-        }
-
-        // =========================
-        // Fix Error Hax / AIO FIX
-        // =========================
-        private const string FixErrorHaxUrl = "https://aka.ms/vs/16/release/vc_redist.x64.exe";
-        private const string AioFixUrl = "https://allinoneruntimes.org/files/aio-runtimes_v2.5.0.exe";
-
-        private static string GetCacheDir()
-        {
-            var dir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "SHNK Tools", "cache");
-
-            Directory.CreateDirectory(dir);
-            return dir;
-        }
-
-        private static void RunAsAdmin(string exePath)
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = exePath,
-                UseShellExecute = true,
-                Verb = "runas"
-            });
-        }
-
-        private async void FixErrorHax_Click(object sender, RoutedEventArgs e)
-        {
-            if (!Confirm("Fix Error Hax will download & run Microsoft VC++ Redistributable (x64).\nContinue?")) return;
-
-            try
-            {
-                var dest = Path.Combine(GetCacheDir(), "vc_redist.x64.exe");
-
-                Logger.Log("Fix Error Hax: Downloading...");
-                await Downloader.DownloadFileAsync(FixErrorHaxUrl, dest);
-
-                if (!File.Exists(dest)) throw new Exception("Download failed.");
-
-                Logger.Log("Fix Error Hax: Running as admin...");
-                RunAsAdmin(dest);
-            }
-            catch (Exception ex)
-            {
-                Logger.Log("Fix Error Hax ERROR: " + ex);
                 MessageBox.Show(ex.Message, "Error");
             }
         }
 
-        private async void AioFix_Click(object sender, RoutedEventArgs e)
+        // =========================================================
+        // INSTALL 32
+        // =========================================================
+        private async void Install32_Click(object sender, RoutedEventArgs e)
         {
-            if (!Confirm("AIO FIX will download & run AIO Runtimes installer.\nContinue?")) return;
+            try
+            {
+                string cfgPath = ExtractEmbeddedFile(
+                    "Shnk_Tools.Config.appsettings.json",
+                    "appsettings.json");
+
+                AppSettings? cfg =
+                    JsonSerializer.Deserialize<AppSettings>(
+                        await File.ReadAllTextAsync(cfgPath));
+
+                if (cfg == null || string.IsNullOrWhiteSpace(cfg.Emu32InstallerUrl))
+                {
+                    MessageBox.Show(
+                        "Installer URL missing.",
+                        "SHNK TOOLS"
+                    );
+                    return;
+                }
+
+                if (!Confirm(
+                    "Download & Run 32-bit Installer?\n\n" +
+                    "• Official package\n" +
+                    "• Automatic setup\n\n" +
+                    "Continue?"
+                ))
+                    return;
+
+                string fileName =
+                    string.IsNullOrWhiteSpace(cfg.Emu32InstallerFileName)
+                    ? "GameLoop_32.exe"
+                    : cfg.Emu32InstallerFileName;
+
+                string dst = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    fileName);
+
+                Logger.Log("Downloading installer...");
+                await Downloader.DownloadFileAsync(cfg.Emu32InstallerUrl, dst);
+
+                await ScriptRunner.RunExeWithLiveLog(dst, "");
+
+                MessageBox.Show(
+                    "Installer launched successfully.",
+                    "SHNK TOOLS"
+                );
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Install32 ERROR: " + ex);
+                MessageBox.Show(ex.Message, "Error");
+            }
+        }
+
+        // =========================================================
+        // FIX ERROR HAX
+        // =========================================================
+        private const string FixErrorHaxUrl =
+            "https://aka.ms/vs/16/release/vc_redist.x64.exe";
+
+        private async void FixErrorHax_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Confirm(
+                "Install Microsoft VC++ Runtime now?\n\nContinue?"
+            ))
+                return;
 
             try
             {
-                var dest = Path.Combine(GetCacheDir(), "aio-runtimes.exe");
+                string dest = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "vc_redist.x64.exe");
 
-                Logger.Log("AIO FIX: Downloading...");
+                await Downloader.DownloadFileAsync(FixErrorHaxUrl, dest);
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = dest,
+                    UseShellExecute = true,
+                    Verb = "runas"
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("FixErrorHax ERROR: " + ex);
+                MessageBox.Show(ex.Message, "Error");
+            }
+        }
+
+        // =========================================================
+        // AIO FIX
+        // =========================================================
+        private const string AioFixUrl =
+            "https://allinoneruntimes.org/files/aio-runtimes_v2.5.0.exe";
+
+        private async void AioFix_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Confirm(
+                "Run AIO FIX now?\n\nContinue?"
+            ))
+                return;
+
+            try
+            {
+                string dest = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "aio-runtimes.exe");
+
                 await Downloader.DownloadFileAsync(AioFixUrl, dest);
 
-                if (!File.Exists(dest)) throw new Exception("Download failed.");
-
-                Logger.Log("AIO FIX: Running as admin...");
-                RunAsAdmin(dest);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = dest,
+                    UseShellExecute = true,
+                    Verb = "runas"
+                });
             }
             catch (Exception ex)
             {
@@ -292,13 +327,21 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================
-        // Reset Guest (Runs BAT by name)
-        // =========================
+        // =========================================================
+        // RESET GUEST
+        // =========================================================
         private void ResetGuest_Click(object sender, RoutedEventArgs e)
         {
-            var w = new ResetGuestWindow { Owner = this };
-            w.OnPickAsync = async (region) => { await RunResetGuestBatAsync(region); };
+            var w = new ResetGuestWindow
+            {
+                Owner = this
+            };
+
+            w.OnPickAsync = async (region) =>
+            {
+                await RunResetGuestBatAsync(region);
+            };
+
             w.ShowDialog();
         }
 
@@ -306,28 +349,27 @@ namespace SHNK.Tools.App
         {
             try
             {
-                // Assets\reset_guest\GL.bat / KR.bat / VNG.bat / TW.bat
-                var bat = Paths.Asset($@"Assets\reset_guest\{region}.bat");
-
-                if (!File.Exists(bat))
-                {
-                    MessageBox.Show($"Missing BAT:\n{bat}", "SHNK TOOLS");
-                    return;
-                }
-
                 if (!ConfirmDanger(
-     $"⚠ Reset Guest ({region}) Will Run Now?\n\n" +
-     "• ADB will restart\n" +
-     "• Device ID will be refreshed\n" +
-     "• Game data will be cleaned\n\n" +
-     "Proceed?"
- )) return;
+                    $"⚠ Reset Guest ({region}) Will Run Now?\n\n" +
+                    "• ADB will restart\n" +
+                    "• Device ID will refresh\n" +
+                    "• Game cache will clean\n\n" +
+                    "Proceed?"
+                ))
+                    return;
 
-                Logger.Log($"ResetGuest: Running {region}.bat ...");
+                string bat = ExtractEmbeddedFile(
+                    $"Shnk_Tools.Assets.reset_guest.{region}.bat",
+                    $"{region}.bat");
+
+                Logger.Log($"Running {region}.bat");
+
                 await ScriptRunner.RunBatWithLiveLog(bat);
-                Logger.Log($"ResetGuest: Finished {region}.");
 
-                MessageBox.Show($"{region} done. Check logs.", "SHNK TOOLS");
+                MessageBox.Show(
+                    $"{region} completed successfully.",
+                    "SHNK TOOLS"
+                );
             }
             catch (Exception ex)
             {
@@ -336,16 +378,29 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================
-        // Confirm dialogs
-        // =========================
+        // =========================================================
+        // CONFIRM
+        // =========================================================
         private static bool Confirm(string msg) =>
-            MessageBox.Show(msg, "SHNK TOOLS", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+            MessageBox.Show(
+                msg,
+                "SHNK TOOLS",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            ) == MessageBoxResult.Yes;
 
         private static bool ConfirmDanger(string msg) =>
-            MessageBox.Show(msg, "WARNING - SHNK TOOLS", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
+            MessageBox.Show(
+                msg,
+                "WARNING - SHNK TOOLS",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            ) == MessageBoxResult.Yes;
     }
 
+    // =========================================================
+    // APP SETTINGS
+    // =========================================================
     public sealed class AppSettings
     {
         public string? Emu32InstallerUrl { get; set; }

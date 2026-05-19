@@ -129,8 +129,9 @@
             </Grid.ColumnDefinitions>
 
             <!-- الخلفية (مضمونة بعد Publish) -->
-            <Image Source="pack://siteoforigin:,,,/Assets/ui_bg.jpg" Stretch="Fill" Grid.ColumnSpan="2"/>
-            <Rectangle Fill="#66000000" Grid.ColumnSpan="2"/>
+            <Image Source="pack://application:,,,/Assets/ui_bg.jpg"
+       Stretch="Fill"
+       Grid.ColumnSpan="2"/>
 
             <!-- Top bar فوق كلشي -->
             <Grid Height="45" VerticalAlignment="Top" Panel.ZIndex="999" Grid.ColumnSpan="2">
