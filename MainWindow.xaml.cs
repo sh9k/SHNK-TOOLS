@@ -100,8 +100,8 @@ namespace SHNK.Tools.App
         // CLEANER
         // =========================================================
         private async void Cleaner_Click(
-            object sender,
-            RoutedEventArgs e)
+     object sender,
+     RoutedEventArgs e)
         {
             if (!ConfirmDanger(
                 "Cleaner Gameloop will run now.\n\n" +
@@ -118,19 +118,64 @@ namespace SHNK.Tools.App
                     "cleaner_gameloop.bat"
                 );
 
-                Logger.Log("Running Cleaner BAT...");
+                // تأكد الملف انكتب
+                if (!File.Exists(bat))
+                {
+                    MessageBox.Show(
+                        "BAT file was not extracted.",
+                        "SHNK TOOLS"
+                    );
+                    return;
+                }
 
-                await ScriptRunner.RunBatWithLiveLog(bat);
+                // عرض المسار الحقيقي
+                MessageBox.Show(
+                    "BAT Extracted To:\n\n" + bat,
+                    "SHNK TOOLS"
+                );
+
+                Logger.Log("Running Cleaner BAT...");
+                Logger.Log("BAT PATH: " + bat);
+
+                // تشغيل CMD مفتوح حتى نشوف الخطأ
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/k \"{bat}\"",
+                    UseShellExecute = true,
+                    CreateNoWindow = false
+                };
+
+                var p = Process.Start(psi);
+
+                if (p == null)
+                {
+                    MessageBox.Show(
+                        "Failed to start BAT.",
+                        "SHNK TOOLS"
+                    );
+                    return;
+                }
+
+                await p.WaitForExitAsync();
+
+                Logger.Log(
+                    "Cleaner BAT ExitCode: " + p.ExitCode
+                );
 
                 MessageBox.Show(
-                    "Cleaner completed successfully.",
+                    "Cleaner finished.\nCheck CMD window.",
                     "SHNK TOOLS"
                 );
             }
             catch (Exception ex)
             {
                 Logger.Log("Cleaner ERROR: " + ex);
-                MessageBox.Show(ex.ToString(), "Error");
+
+                MessageBox.Show(
+                    ex.ToString(),
+                    "Error"
+                );
             }
         }
 
