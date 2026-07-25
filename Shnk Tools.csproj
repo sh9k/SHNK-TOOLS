@@ -10,9 +10,9 @@
 		<ApplicationIcon>Assets\app.ico</ApplicationIcon>
 
 		<!-- VERSION -->
-		<Version>2.0.4</Version>
-		<AssemblyVersion>2.0.4.0</AssemblyVersion>
-		<FileVersion>2.0.4.0</FileVersion>
+		<Version>2.0.5</Version>
+		<AssemblyVersion>2.0.5.0</AssemblyVersion>
+		<FileVersion>2.0.5.0</FileVersion>
 
 		<!-- SINGLE EXE -->
 		<PublishSingleFile>true</PublishSingleFile>
