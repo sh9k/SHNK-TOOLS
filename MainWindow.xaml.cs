@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -87,9 +87,7 @@ namespace SHNK.Tools.App
                     url
                 );
 
-                TryDeleteDownloadFiles(
-                    destination
-                );
+                TryDeleteDownloadFiles(destination);
 
                 if (progressWindow.IsVisible)
                     progressWindow.Close();
@@ -103,9 +101,7 @@ namespace SHNK.Tools.App
                     ex
                 );
 
-                TryDeleteDownloadFiles(
-                    destination
-                );
+                TryDeleteDownloadFiles(destination);
 
                 if (progressWindow.IsVisible)
                     progressWindow.Close();
@@ -149,11 +145,6 @@ namespace SHNK.Tools.App
             }
         }
 
-    // =========================================================
-    // باقي دوال MainWindow هنا
-    // =========================================================
-
-
         // =========================================================
         // EXTRACT EMBEDDED FILE
         // =========================================================
@@ -164,26 +155,30 @@ namespace SHNK.Tools.App
             string tempDir =
                 Path.Combine(
                     Path.GetTempPath(),
-                    "SHNKTOOLS");
+                    "SHNKTOOLS"
+                );
 
             Directory.CreateDirectory(tempDir);
 
             string outputPath =
                 Path.Combine(
                     tempDir,
-                    outputName);
+                    outputName
+                );
 
             using Stream? stream =
                 Assembly
                     .GetExecutingAssembly()
                     .GetManifestResourceStream(
-                        resourceName);
+                        resourceName
+                    );
 
             if (stream == null)
             {
                 throw new Exception(
                     "Embedded resource not found:\n" +
-                    resourceName);
+                    resourceName
+                );
             }
 
             string? dir =
@@ -196,7 +191,8 @@ namespace SHNK.Tools.App
                 new FileStream(
                     outputPath,
                     FileMode.Create,
-                    FileAccess.Write);
+                    FileAccess.Write
+                );
 
             stream.CopyTo(fs);
 
@@ -210,8 +206,7 @@ namespace SHNK.Tools.App
             object sender,
             MouseButtonEventArgs e)
         {
-            if (e.ButtonState ==
-                MouseButtonState.Pressed)
+            if (e.ButtonState == MouseButtonState.Pressed)
             {
                 DragMove();
             }
@@ -228,8 +223,7 @@ namespace SHNK.Tools.App
             object sender,
             RoutedEventArgs e)
         {
-            WindowState =
-                WindowState.Minimized;
+            WindowState = WindowState.Minimized;
         }
 
         // =========================================================
@@ -243,7 +237,8 @@ namespace SHNK.Tools.App
                 "Cleaner Gameloop will run now.\n\n" +
                 "• Emulator cache will clean\n" +
                 "• Temporary files will remove\n\n" +
-                "Continue?"))
+                "Continue?"
+            ))
             {
                 return;
             }
@@ -253,31 +248,37 @@ namespace SHNK.Tools.App
                 string bat =
                     ExtractEmbeddedFile(
                         "Shnk_Tools.Assets.scripts.cleaner_gameloop.bat",
-                        "cleaner_gameloop.bat");
+                        "cleaner_gameloop.bat"
+                    );
 
                 if (!File.Exists(bat))
                 {
                     MessageBox.Show(
                         "BAT file was not extracted.",
-                        "SHNK TOOLS");
+                        "SHNK TOOLS"
+                    );
 
                     return;
                 }
 
                 Logger.Log(
-                    "Running Cleaner BAT...");
+                    "Running Cleaner BAT..."
+                );
 
                 Logger.Log(
-                    "BAT PATH: " + bat);
+                    "BAT PATH: " + bat
+                );
 
                 var psi =
                     new ProcessStartInfo
                     {
                         FileName = "cmd.exe",
-                        Arguments =
-                            $"/k \"{bat}\"",
+                        Arguments = $"/k \"\"{bat}\"\"",
                         UseShellExecute = true,
-                        CreateNoWindow = false
+                        CreateNoWindow = false,
+                        WorkingDirectory =
+                            Path.GetDirectoryName(bat) ??
+                            Environment.CurrentDirectory
                     };
 
                 var p =
@@ -287,7 +288,8 @@ namespace SHNK.Tools.App
                 {
                     MessageBox.Show(
                         "Failed to start BAT.",
-                        "SHNK TOOLS");
+                        "SHNK TOOLS"
+                    );
 
                     return;
                 }
@@ -296,21 +298,25 @@ namespace SHNK.Tools.App
 
                 Logger.Log(
                     "Cleaner BAT ExitCode: " +
-                    p.ExitCode);
+                    p.ExitCode
+                );
 
                 MessageBox.Show(
                     "Cleaner finished.",
-                    "SHNK TOOLS");
+                    "SHNK TOOLS"
+                );
             }
             catch (Exception ex)
             {
                 Logger.Log(
                     "Cleaner ERROR: " +
-                    ex);
+                    ex
+                );
 
                 MessageBox.Show(
                     ex.ToString(),
-                    "Error");
+                    "Error"
+                );
             }
         }
 
@@ -328,7 +334,8 @@ namespace SHNK.Tools.App
             {
                 MessageBox.Show(
                     "Gameloop path not found.",
-                    "SHNK TOOLS");
+                    "SHNK TOOLS"
+                );
 
                 return;
             }
@@ -338,10 +345,10 @@ namespace SHNK.Tools.App
                 string tempDir =
                     Path.Combine(
                         Path.GetTempPath(),
-                        "SHNKTOOLS_FIXGL");
+                        "SHNKTOOLS_FIXGL"
+                    );
 
-                Directory.CreateDirectory(
-                    tempDir);
+                Directory.CreateDirectory(tempDir);
 
                 var asm =
                     Assembly.GetExecutingAssembly();
@@ -352,14 +359,14 @@ namespace SHNK.Tools.App
                     asm.GetManifestResourceNames())
                 {
                     if (!res.Contains(
-                        "Assets.fix_gl.ui"))
+                        "Assets.fix_gl.ui",
+                        StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
 
                     using Stream? s =
-                        asm.GetManifestResourceStream(
-                            res);
+                        asm.GetManifestResourceStream(res);
 
                     if (s == null)
                         continue;
@@ -367,36 +374,42 @@ namespace SHNK.Tools.App
                     string fileName =
                         res.Replace(
                             "Shnk_Tools.Assets.fix_gl.ui.",
-                            "");
+                            "",
+                            StringComparison.OrdinalIgnoreCase
+                        );
 
                     fileName =
                         fileName
-                            .Replace(
-                                ".dll.",
-                                ".dll")
-                            .Replace(
-                                ".exe.",
-                                ".exe")
-                            .Replace(
-                                ".pak.",
-                                ".pak")
-                            .Replace(
-                                ".dat.",
-                                ".dat")
-                            .Replace(
-                                ".ini.",
-                                ".ini");
+                            .Replace(".dll.", ".dll")
+                            .Replace(".exe.", ".exe")
+                            .Replace(".pak.", ".pak")
+                            .Replace(".dat.", ".dat")
+                            .Replace(".ini.", ".ini");
 
                     string tempFile =
                         Path.Combine(
                             tempDir,
-                            fileName);
+                            fileName
+                        );
+
+                    string? tempDirectory =
+                        Path.GetDirectoryName(tempFile);
+
+                    if (!string.IsNullOrWhiteSpace(
+                        tempDirectory))
+                    {
+                        Directory.CreateDirectory(
+                            tempDirectory
+                        );
+                    }
 
                     using (
                         FileStream fs =
                             new FileStream(
                                 tempFile,
-                                FileMode.Create))
+                                FileMode.Create,
+                                FileAccess.Write,
+                                FileShare.None))
                     {
                         s.CopyTo(fs);
                     }
@@ -404,12 +417,25 @@ namespace SHNK.Tools.App
                     string dest =
                         Path.Combine(
                             uiPath,
-                            fileName);
+                            fileName
+                        );
+
+                    string? destDirectory =
+                        Path.GetDirectoryName(dest);
+
+                    if (!string.IsNullOrWhiteSpace(
+                        destDirectory))
+                    {
+                        Directory.CreateDirectory(
+                            destDirectory
+                        );
+                    }
 
                     File.Copy(
                         tempFile,
                         dest,
-                        true);
+                        true
+                    );
 
                     copied++;
                 }
@@ -418,161 +444,319 @@ namespace SHNK.Tools.App
                     @"C:\Windows\System32\drivers\etc\hosts";
 
                 if (File.Exists(hostsPath))
+                {
                     File.Delete(hostsPath);
+                }
+
+                Logger.Log(
+                    $"Fix GL completed. Files copied: {copied}"
+                );
 
                 MessageBox.Show(
                     $"Fix GL Completed Successfully.\n\n" +
                     $"Files Copied: {copied}",
-                    "SHNK TOOLS");
+                    "SHNK TOOLS"
+                );
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Logger.Log(
+                    "FixGL permission ERROR: " +
+                    ex
+                );
+
+                MessageBox.Show(
+                    "Access denied.\n\n" +
+                    "Please run SHNK TOOLS as Administrator.",
+                    "Fix GL Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
             }
             catch (Exception ex)
             {
                 Logger.Log(
                     "FixGL ERROR: " +
-                    ex);
+                    ex
+                );
 
                 MessageBox.Show(
                     ex.ToString(),
-                    "Error");
+                    "Error"
+                );
             }
         }
 
         // =========================================================
-        // FIX KR
+        // FIX KR - DIRECT FILE INSTALL
         // =========================================================
-        private void FixKr_Click(
+        private async void FixKr_Click(
             object sender,
             RoutedEventArgs e)
         {
-            var uiPath =
-                GameLoopFinder.FindUiPath();
-
-            if (uiPath == null)
+            if (!ConfirmDanger(
+                "Install Fix KR now?\n\n" +
+                "The following files will be replaced:\n\n" +
+                "• AEngine.dll\n" +
+                "• DefaultKeyMapping.xml\n" +
+                "• GameSidebar.xml\n" +
+                "• smk.conf\n" +
+                "• translate.conf\n" +
+                "• Windows hosts file\n\n" +
+                "Continue?"
+            ))
             {
-                MessageBox.Show(
-                    "Gameloop path not found.",
-                    "SHNK TOOLS");
-
                 return;
             }
 
             try
             {
-                var asm =
+                Logger.Log(
+                    "Starting Fix KR..."
+                );
+
+                // =====================================================
+                // FIND GAMELOOP UI PATH
+                // =====================================================
+
+                string? uiPath =
+                    GameLoopFinder.FindUiPath();
+
+                if (string.IsNullOrWhiteSpace(uiPath))
+                {
+                    MessageBox.Show(
+                        "GameLoop path was not found.\n\n" +
+                        "Please make sure GameLoop is installed.",
+                        "SHNK TOOLS",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning
+                    );
+
+                    Logger.Log(
+                        "Fix KR failed: GameLoop UI path not found."
+                    );
+
+                    return;
+                }
+
+                Logger.Log(
+                    "GameLoop UI Path: " +
+                    uiPath
+                );
+
+                Directory.CreateDirectory(uiPath);
+
+                // =====================================================
+                // FILES TO INSTALL
+                // =====================================================
+
+                string[] uiFiles =
+                {
+                    "AEngine.dll",
+                    "DefaultKeyMapping.xml",
+                    "GameSidebar.xml",
+                    "smk.conf",
+                    "translate.conf"
+                };
+
+                Assembly asm =
                     Assembly.GetExecutingAssembly();
 
-                // HOSTS
-                string hostsTemp =
-                    Path.Combine(
-                        Path.GetTempPath(),
-                        "hosts");
+                string[] resources =
+                    asm.GetManifestResourceNames();
 
-                string? hostsRes = null;
+                int copied = 0;
 
-                foreach (var r in
-                    asm.GetManifestResourceNames())
+                foreach (string fileName in uiFiles)
                 {
-                    if (
-                        r.Contains("fix_kr") &&
-                        r.EndsWith("hosts"))
+                    // Find the resource by its ending rather than
+                    // relying on the exact root namespace.
+                    string? resourceName =
+                        resources.FirstOrDefault(
+                            r =>
+                                r.EndsWith(
+                                    $"Assets.fix_kr.{fileName}",
+                                    StringComparison.OrdinalIgnoreCase
+                                )
+                        );
+
+                    if (string.IsNullOrWhiteSpace(
+                        resourceName))
                     {
-                        hostsRes = r;
-                        break;
+                        Logger.Log(
+                            $"FIX KR resource missing: {fileName}"
+                        );
+
+                        throw new Exception(
+                            "Embedded resource not found:\n\n" +
+                            fileName
+                        );
                     }
-                }
 
-                if (hostsRes == null)
-                {
-                    throw new Exception(
-                        "Embedded hosts resource not found.");
-                }
+                    Logger.Log(
+                        $"FIX KR resource: {resourceName}"
+                    );
 
-                using (
-                    Stream? s =
+                    string destination =
+                        Path.Combine(
+                            uiPath,
+                            fileName
+                        );
+
+                    Logger.Log(
+                        $"Copying: {fileName}"
+                    );
+
+                    using Stream? resourceStream =
                         asm.GetManifestResourceStream(
-                            hostsRes))
-                {
-                    if (s != null)
-                    {
-                        using FileStream fs =
-                            new FileStream(
-                                hostsTemp,
-                                FileMode.Create);
+                            resourceName
+                        );
 
-                        s.CopyTo(fs);
-                    }
-                }
-
-                File.Copy(
-                    hostsTemp,
-                    @"C:\Windows\System32\drivers\etc\hosts",
-                    true);
-
-                // KR ZIP
-                string zipTemp =
-                    Path.Combine(
-                        Path.GetTempPath(),
-                        "KR.zip");
-
-                string? zipRes = null;
-
-                foreach (var r in
-                    asm.GetManifestResourceNames())
-                {
-                    if (
-                        r.Contains("fix_kr") &&
-                        (
-                            r.EndsWith("KR.zip") ||
-                            r.EndsWith("krzip.bin")))
-                    {
-                        zipRes = r;
-                        break;
-                    }
-                }
-
-                if (zipRes == null)
-                {
-                    throw new Exception(
-                        "KR resource missing.");
-                }
-
-                using (
-                    Stream? s =
-                        asm.GetManifestResourceStream(
-                            zipRes))
-                {
-                    if (s == null)
+                    if (resourceStream == null)
                     {
                         throw new Exception(
-                            "KR stream null.");
+                            "Could not open embedded resource:\n\n" +
+                            resourceName
+                        );
                     }
 
-                    using FileStream fs =
+                    using FileStream output =
                         new FileStream(
-                            zipTemp,
-                            FileMode.Create);
+                            destination,
+                            FileMode.Create,
+                            FileAccess.Write,
+                            FileShare.None
+                        );
 
-                    s.CopyTo(fs);
+                    await resourceStream.CopyToAsync(
+                        output
+                    );
+
+                    copied++;
+
+                    Logger.Log(
+                        $"Copied successfully: {destination}"
+                    );
                 }
 
-                ZipFile.ExtractToDirectory(
-                    zipTemp,
-                    uiPath,
-                    true);
+                // =====================================================
+                // HOSTS
+                // =====================================================
+
+                string hostsPath =
+                    @"C:\Windows\System32\drivers\etc\hosts";
+
+                string? hostsResource =
+                    resources.FirstOrDefault(
+                        r =>
+                            r.EndsWith(
+                                "Assets.fix_kr.hosts",
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                    );
+
+                if (string.IsNullOrWhiteSpace(
+                    hostsResource))
+                {
+                    throw new Exception(
+                        "Embedded hosts resource not found."
+                    );
+                }
+
+                Logger.Log(
+                    $"Hosts resource: {hostsResource}"
+                );
+
+                using Stream? hostsStream =
+                    asm.GetManifestResourceStream(
+                        hostsResource
+                    );
+
+                if (hostsStream == null)
+                {
+                    throw new Exception(
+                        "Could not open embedded hosts resource."
+                    );
+                }
+
+                using FileStream hostsOutput =
+                    new FileStream(
+                        hostsPath,
+                        FileMode.Create,
+                        FileAccess.Write,
+                        FileShare.Read
+                    );
+
+                await hostsStream.CopyToAsync(
+                    hostsOutput
+                );
+
+                Logger.Log(
+                    "Hosts file installed successfully."
+                );
+
+                // =====================================================
+                // CLEANUP / RESULT
+                // =====================================================
 
                 MessageBox.Show(
-                    "Fix KR Completed.",
-                    "SHNK TOOLS");
+                    "Fix KR completed successfully!\n\n" +
+                    $"Files copied: {copied}/5\n" +
+                    "Hosts file installed successfully.\n\n" +
+                    "Please restart GameLoop.",
+                    "SHNK TOOLS",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+
+                Logger.Log(
+                    "Fix KR completed successfully."
+                );
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Logger.Log(
+                    "Fix KR permission error: " +
+                    ex
+                );
+
+                MessageBox.Show(
+                    "Access denied while installing Fix KR.\n\n" +
+                    "Please run SHNK TOOLS as Administrator.",
+                    "SHNK TOOLS",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
+            catch (IOException ex)
+            {
+                Logger.Log(
+                    "Fix KR IO error: " +
+                    ex
+                );
+
+                MessageBox.Show(
+                    "A file could not be replaced because it may be in use.\n\n" +
+                    "Close GameLoop completely and try again.\n\n" +
+                    ex.Message,
+                    "Fix KR Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
             }
             catch (Exception ex)
             {
                 Logger.Log(
-                    "FixKR ERROR: " +
-                    ex);
+                    "Fix KR ERROR: " +
+                    ex
+                );
 
                 MessageBox.Show(
                     ex.ToString(),
-                    "Error");
+                    "Fix KR Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
             }
         }
 
@@ -585,35 +769,42 @@ namespace SHNK.Tools.App
         {
             if (!Confirm(
                 "Clear Temp + Cache now?\n\n" +
-                "Continue?"))
+                "Continue?"
+            ))
             {
                 return;
             }
 
             try
             {
-                await Task.Run(() =>
-                {
-                    string temp =
-                        Path.GetTempPath();
+                await Task.Run(
+                    () =>
+                    {
+                        string temp =
+                            Path.GetTempPath();
 
-                    FileOps.SafeDeleteContents(
-                        temp);
-                });
+                        FileOps.SafeDeleteContents(
+                            temp
+                        );
+                    }
+                );
 
                 MessageBox.Show(
                     "Temp cleared successfully.",
-                    "SHNK TOOLS");
+                    "SHNK TOOLS"
+                );
             }
             catch (Exception ex)
             {
                 Logger.Log(
                     "ClearTemp ERROR: " +
-                    ex);
+                    ex
+                );
 
                 MessageBox.Show(
                     ex.ToString(),
-                    "Error");
+                    "Error"
+                );
             }
         }
 
@@ -658,7 +849,9 @@ namespace SHNK.Tools.App
                     "• Automatic setup\n\n" +
                     "Continue?"
                 ))
+                {
                     return;
+                }
 
                 string fileName =
                     string.IsNullOrWhiteSpace(
@@ -714,7 +907,6 @@ namespace SHNK.Tools.App
             }
         }
 
-
         // =========================================================
         // FIX ERROR HAX
         // =========================================================
@@ -726,9 +918,12 @@ namespace SHNK.Tools.App
             RoutedEventArgs e)
         {
             if (!Confirm(
-                "Install Microsoft VC++ Runtime now?\n\nContinue?"
+                "Install Microsoft VC++ Runtime now?\n\n" +
+                "Continue?"
             ))
+            {
                 return;
+            }
 
             try
             {
@@ -778,7 +973,6 @@ namespace SHNK.Tools.App
             }
         }
 
-
         // =========================================================
         // AIO FIX
         // =========================================================
@@ -790,9 +984,12 @@ namespace SHNK.Tools.App
             RoutedEventArgs e)
         {
             if (!Confirm(
-                "Run AIO FIX now?\n\nContinue?"
+                "Run AIO FIX now?\n\n" +
+                "Continue?"
             ))
+            {
                 return;
+            }
 
             try
             {
@@ -859,7 +1056,8 @@ namespace SHNK.Tools.App
                 async region =>
                 {
                     await RunResetGuestBatAsync(
-                        region);
+                        region
+                    );
                 };
 
             w.ShowDialog();
@@ -875,7 +1073,8 @@ namespace SHNK.Tools.App
                     "• ADB will restart\n" +
                     "• Device ID will refresh\n" +
                     "• Game cache will clean\n\n" +
-                    "Proceed?"))
+                    "Proceed?"
+                ))
                 {
                     return;
                 }
@@ -883,29 +1082,36 @@ namespace SHNK.Tools.App
                 string bat =
                     ExtractEmbeddedFile(
                         $"Shnk_Tools.Assets.reset_guest.{region}.bat",
-                        $"{region}.bat");
+                        $"{region}.bat"
+                    );
 
                 Logger.Log(
-                    $"Running {region}.bat");
+                    $"Running {region}.bat"
+                );
 
                 await ScriptRunner.RunBatWithLiveLog(
-                    bat);
+                    bat
+                );
 
                 MessageBox.Show(
                     $"{region} completed successfully.",
-                    "SHNK TOOLS");
+                    "SHNK TOOLS"
+                );
             }
             catch (Exception ex)
             {
                 Logger.Log(
                     "ResetGuest ERROR: " +
-                    ex);
+                    ex
+                );
 
                 MessageBox.Show(
                     ex.ToString(),
-                    "Error");
+                    "Error"
+                );
             }
         }
+
         // =========================================================
         // CONFIRM
         // =========================================================
@@ -931,22 +1137,22 @@ namespace SHNK.Tools.App
             ) == MessageBoxResult.Yes;
         }
     }
-}
 
-// =========================================================
-// APP SETTINGS
-// =========================================================
-public sealed class AppSettings
-{
-    public string? Emu32InstallerUrl
+    // =========================================================
+    // APP SETTINGS
+    // =========================================================
+    public sealed class AppSettings
     {
-        get;
-        set;
-    }
+        public string? Emu32InstallerUrl
+        {
+            get;
+            set;
+        }
 
-    public string? Emu32InstallerFileName
-    {
-        get;
-        set;
+        public string? Emu32InstallerFileName
+        {
+            get;
+            set;
+        }
     }
 }
