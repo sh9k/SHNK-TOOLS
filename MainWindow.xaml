@@ -2,98 +2,78 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SHNK TOOLS"
-        Width="980" Height="520"
+        Width="980" Height="480"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         ResizeMode="NoResize"
         AllowsTransparency="True"
         Background="Transparent">
 
-    <!-- إذا عندك app.ico رجّع سطر Icon هذا:
-         Icon="pack://siteoforigin:,,,/Assets/app.ico"
-    -->
-
     <Window.Resources>
 
-        <!-- RGB Stroke (نسمّي الستوبات حتى نحرّكها من Window.Triggers) -->
+        <!-- RGB Stroke (نفس الأصلي) -->
         <LinearGradientBrush x:Key="RgbStroke" StartPoint="0,0" EndPoint="1,1">
             <GradientStop x:Name="S0" Color="#FFFF3B3B" Offset="0.00"/>
             <GradientStop x:Name="S1" Color="#FF3BD7FF" Offset="0.50"/>
             <GradientStop x:Name="S2" Color="#FF7A3BFF" Offset="1.00"/>
         </LinearGradientBrush>
 
-        <!-- زر نيون + hover/press -->
-        <Style x:Key="NeonBtn" TargetType="Button">
+        <Style x:Key="CardBase" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <!-- =============== ستايل أزرق =============== -->
+        <Style x:Key="NeonBlue" BasedOn="{StaticResource CardBase}" TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Outer"
-                        CornerRadius="18"
-                        BorderThickness="2">
-                            <Border.BorderBrush>
-                                <!-- نفس الـ RGB بس داخل القالب (مهم) -->
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop x:Name="G0" Color="#FFFF3B3B" Offset="0.00"/>
-                                    <GradientStop x:Name="G1" Color="#FF3BD7FF" Offset="0.50"/>
-                                    <GradientStop x:Name="G2" Color="#FF7A3BFF" Offset="1.00"/>
-                                </LinearGradientBrush>
-                            </Border.BorderBrush>
-
-                            <Border.Effect>
-                                <DropShadowEffect Color="#FF00E5FF" BlurRadius="22" ShadowDepth="0" Opacity="0.65"/>
-                            </Border.Effect>
-
-                            <Border Margin="2" CornerRadius="16" Background="#22000000" BorderBrush="#44FFFFFF" BorderThickness="1">
+                        <Grid>
+                            <Border x:Name="GlowBorder" CornerRadius="16"
+                                    Background="#332FB6FF" Opacity="0.55">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#FF2FB6FF" BlurRadius="22" ShadowDepth="0" Opacity="1"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="Outer" CornerRadius="16" BorderThickness="2"
+                                    Background="#B3050A14" BorderBrush="#FF2FB6FF">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                        </Border>
-
+                        </Grid>
                         <ControlTemplate.Triggers>
-                            <!-- Animation شغال 100% لأن TargetName داخل نفس القالب -->
                             <EventTrigger RoutedEvent="FrameworkElement.Loaded">
                                 <BeginStoryboard>
                                     <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                        <DoubleAnimation Storyboard.TargetName="G0" Storyboard.TargetProperty="Offset"
-                                                 From="0.00" To="1.00" Duration="0:0:2.6"/>
-                                        <DoubleAnimation Storyboard.TargetName="G1" Storyboard.TargetProperty="Offset"
-                                                 From="0.50" To="0.00" Duration="0:0:2.6"/>
-                                        <DoubleAnimation Storyboard.TargetName="G2" Storyboard.TargetProperty="Offset"
-                                                 From="1.00" To="0.25" Duration="0:0:2.6"/>
-
-                                        <ColorAnimation Storyboard.TargetName="G0" Storyboard.TargetProperty="Color"
-                                                From="#FFFF3B3B" To="#FF3BFF7A" Duration="0:0:2.6"/>
-                                        <ColorAnimation Storyboard.TargetName="G1" Storyboard.TargetProperty="Color"
-                                                From="#FF3BD7FF" To="#FFFFD93B" Duration="0:0:2.6"/>
-                                        <ColorAnimation Storyboard.TargetName="G2" Storyboard.TargetProperty="Color"
-                                                From="#FF7A3BFF" To="#FFFF3BD7" Duration="0:0:2.6"/>
+                                        <DoubleAnimation Storyboard.TargetName="GlowBorder"
+                                                          Storyboard.TargetProperty="Opacity"
+                                                          From="0.35" To="0.85" Duration="0:0:1.8"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </EventTrigger>
-
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Outer" Property="RenderTransformOrigin" Value="0.5,0.5"/>
                                 <Setter TargetName="Outer" Property="RenderTransform">
                                     <Setter.Value>
-                                        <ScaleTransform ScaleX="1.04" ScaleY="1.04"/>
+                                        <ScaleTransform ScaleX="1.045" ScaleY="1.045"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="GlowBorder" Property="Opacity" Value="1"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.08" ScaleY="1.08"/>
                                     </Setter.Value>
                                 </Setter>
                             </Trigger>
-
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Outer" Property="RenderTransformOrigin" Value="0.5,0.5"/>
                                 <Setter TargetName="Outer" Property="RenderTransform">
                                     <Setter.Value>
-                                        <ScaleTransform ScaleX="0.985" ScaleY="0.985"/>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
                                     </Setter.Value>
                                 </Setter>
                             </Trigger>
-
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.45"/>
                             </Trigger>
@@ -103,147 +83,475 @@
             </Setter>
         </Style>
 
-        <!-- أزرار العنوان (min/close) -->
+        <!-- =============== ستايل أخضر =============== -->
+        <Style x:Key="NeonGreen" BasedOn="{StaticResource CardBase}" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="GlowBorder" CornerRadius="16"
+                                    Background="#333BFF7A" Opacity="0.55">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#FF3BFF7A" BlurRadius="22" ShadowDepth="0" Opacity="1"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="Outer" CornerRadius="16" BorderThickness="2"
+                                    Background="#B3050A14" BorderBrush="#FF3BFF7A">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                        <DoubleAnimation Storyboard.TargetName="GlowBorder"
+                                                          Storyboard.TargetProperty="Opacity"
+                                                          From="0.35" To="0.85" Duration="0:0:1.8"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.045" ScaleY="1.045"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="GlowBorder" Property="Opacity" Value="1"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.08" ScaleY="1.08"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- =============== ستايل بنفسجي =============== -->
+        <Style x:Key="NeonPurple" BasedOn="{StaticResource CardBase}" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="GlowBorder" CornerRadius="16"
+                                    Background="#33B14BFF" Opacity="0.55">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#FFB14BFF" BlurRadius="22" ShadowDepth="0" Opacity="1"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="Outer" CornerRadius="16" BorderThickness="2"
+                                    Background="#B3050A14" BorderBrush="#FFB14BFF">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                        <DoubleAnimation Storyboard.TargetName="GlowBorder"
+                                                          Storyboard.TargetProperty="Opacity"
+                                                          From="0.35" To="0.85" Duration="0:0:1.8"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.045" ScaleY="1.045"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="GlowBorder" Property="Opacity" Value="1"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.08" ScaleY="1.08"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- =============== ستايل برتقالي =============== -->
+        <Style x:Key="NeonOrange" BasedOn="{StaticResource CardBase}" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="GlowBorder" CornerRadius="16"
+                                    Background="#33FFA23B" Opacity="0.55">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#FFFFA23B" BlurRadius="22" ShadowDepth="0" Opacity="1"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="Outer" CornerRadius="16" BorderThickness="2"
+                                    Background="#B3050A14" BorderBrush="#FFFFA23B">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                        <DoubleAnimation Storyboard.TargetName="GlowBorder"
+                                                          Storyboard.TargetProperty="Opacity"
+                                                          From="0.35" To="0.85" Duration="0:0:1.8"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.045" ScaleY="1.045"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="GlowBorder" Property="Opacity" Value="1"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.08" ScaleY="1.08"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- =============== ستايل أحمر =============== -->
+        <Style x:Key="NeonRed" BasedOn="{StaticResource CardBase}" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="GlowBorder" CornerRadius="16"
+                                    Background="#33FF3B3B" Opacity="0.55">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#FFFF3B3B" BlurRadius="22" ShadowDepth="0" Opacity="1"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="Outer" CornerRadius="16" BorderThickness="2"
+                                    Background="#B3050A14" BorderBrush="#FFFF3B3B">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                        <DoubleAnimation Storyboard.TargetName="GlowBorder"
+                                                          Storyboard.TargetProperty="Opacity"
+                                                          From="0.35" To="0.85" Duration="0:0:1.8"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.045" ScaleY="1.045"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="GlowBorder" Property="Opacity" Value="1"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="GlowBorder" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.08" ScaleY="1.08"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Outer" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- أزرار العنوان (min/close) - دائرية نيون -->
         <Style x:Key="TitleBtn" TargetType="Button">
-            <Setter Property="Width" Value="36"/>
+            <Setter Property="Width" Value="30"/>
             <Setter Property="Height" Value="26"/>
             <Setter Property="Foreground" Value="#DDFFFFFF"/>
-            <Setter Property="Background" Value="#22000000"/>
-            <Setter Property="BorderBrush" Value="#55FFFFFF"/>
-            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="13" Background="#33000000" BorderBrush="#552FB6FF" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FF2FB6FF"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#552FB6FF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
     </Window.Resources>
 
-    <!-- RGB Animation الصحيح (هنا مكانه) -->
-   
-
-    <Border CornerRadius="24"
-            BorderThickness="4"
-            BorderBrush="{StaticResource RgbStroke}">
+    <Border CornerRadius="24" BorderThickness="3" BorderBrush="{StaticResource RgbStroke}">
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="917*"/>
-                <ColumnDefinition Width="55*"/>
-            </Grid.ColumnDefinitions>
 
-            <!-- الخلفية (مضمونة بعد Publish) -->
-            <Image Source="pack://application:,,,/Assets/ui_bg.jpg"
-       Stretch="Fill"
-       Grid.ColumnSpan="2"/>
+            <!-- ===== الخلفية الداكنة ===== -->
+            <Border CornerRadius="21" Background="#FF060A14"/>
 
-            <!-- Top bar فوق كلشي -->
-            <Grid Height="45" VerticalAlignment="Top" Panel.ZIndex="999" Grid.ColumnSpan="2">
+            <!-- صورة الخلفية القديمة محفوظة كطبقة تكسچر خفيفة جداً (ما انحذفت) -->
+            <Image Source="pack://application:,,,/Assets/ui_bg.jpg" Stretch="UniformToFill" Opacity="0.08"/>
+
+            <!-- نمط شبكي (Grid Pattern) -->
+            <Border CornerRadius="21" ClipToBounds="True">
+                <Border.Background>
+                    <DrawingBrush TileMode="Tile" Viewport="0,0,40,40" ViewportUnits="Absolute" Opacity="0.10">
+                        <DrawingBrush.Drawing>
+                            <GeometryDrawing>
+                                <GeometryDrawing.Pen>
+                                    <Pen Brush="#FF2FB6FF" Thickness="1"/>
+                                </GeometryDrawing.Pen>
+                                <GeometryDrawing.Geometry>
+                                    <GeometryGroup>
+                                        <LineGeometry StartPoint="0,0" EndPoint="40,0"/>
+                                        <LineGeometry StartPoint="0,0" EndPoint="0,40"/>
+                                    </GeometryGroup>
+                                </GeometryDrawing.Geometry>
+                            </GeometryDrawing>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- خطوط نيون زخرفية بالزوايا -->
+            <Path Stroke="#552FB6FF" StrokeThickness="2" Data="M 700,30 L 760,30 L 800,70 L 940,70" Opacity="0.7"/>
+            <Path Stroke="#553BFF7A" StrokeThickness="2" Data="M 780,40 L 720,100 L 620,100" Opacity="0.6"/>
+            <Path Stroke="#552FB6FF" StrokeThickness="2" Data="M 40,600 L 40,560 L 100,500 L 260,500" Opacity="0.5"/>
+
+            <!-- ===== Top bar (سحب + أزرار) ===== -->
+            <Grid Height="45" VerticalAlignment="Top" Panel.ZIndex="999">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="110"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Drag only on left side (ما يغطي الأزرار) -->
-                <Border Grid.Column="0"
-                        Background="Transparent"
+                <Border Grid.Column="0" Background="Transparent"
                         MouseLeftButtonDown="DragBar_MouseLeftButtonDown"/>
 
-                <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Margin="0,8,12,0">
-                    <Button Style="{StaticResource TitleBtn}"
-                            Content="—"
-                            Click="Minimize_Click"/>
-
-                    <Button Style="{StaticResource TitleBtn}"
-                            Margin="8,0,0,0"
-                            Content="✕"
-                            Click="Close_Click"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,14,0">
+                    <Button Style="{StaticResource TitleBtn}" Content="—" Click="Minimize_Click"/>
+                    <Button Style="{StaticResource TitleBtn}" Margin="8,0,0,0" Content="✕" Click="Close_Click"/>
                 </StackPanel>
             </Grid>
 
-            <!-- العنوان -->
-            <TextBlock Text="SHNK TOOLS"
-                       FontSize="42"
-                       FontWeight="Bold"
-                       Foreground="White"
-                       HorizontalAlignment="Left"
-                       Margin="356,55,0,0"/>
+            <!-- ===== الشعار SHNK TOOLS + المفتاح ===== -->
+            <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="34,26,0,0">
 
-            <!-- الأزرار -->
-            <!-- الأزرار -->
-            <Grid VerticalAlignment="Top" Margin="0,180,0,0" Grid.ColumnSpan="2">
+                <!-- أيقونة المفتاح (رسم متجه حقيقي - مو إيموجي) -->
+                <Path Data="M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z"
+                      Fill="#FF2FB6FF" Stretch="Uniform" Width="46" Height="46"
+                      RenderTransformOrigin="0.5,0.5"
+                      HorizontalAlignment="Left" Margin="150,-14,0,0">
+                    <Path.RenderTransform>
+                        <RotateTransform Angle="-40"/>
+                    </Path.RenderTransform>
+                    <Path.Effect>
+                        <DropShadowEffect Color="#FF2FB6FF" BlurRadius="20" ShadowDepth="0" Opacity="0.9"/>
+                    </Path.Effect>
+                </Path>
+
+                <StackPanel>
+                    <TextBlock Text="SHNK" FontSize="46" FontWeight="ExtraBold" Foreground="White" FontFamily="Segoe UI Black">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#FFFFFFFF" BlurRadius="10" ShadowDepth="0" Opacity="0.5"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text="TOOLS" FontSize="46" FontWeight="ExtraBold" Foreground="#FF2FB6FF" FontFamily="Segoe UI Black" Margin="0,-10,0,0">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#FF2FB6FF" BlurRadius="18" ShadowDepth="0" Opacity="1"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+
+            <!-- ===== OPTIMIZATION UTILITY ===== -->
+            <TextBlock Text="OPTIMIZATION UTILITY" Foreground="#772FB6FF" FontSize="15" FontWeight="SemiBold"
+                       HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,52,40,0"/>
+
+            <!-- ===== الأزرار (نفس الـ Click handlers الأصلية) ===== -->
+            <Grid VerticalAlignment="Top" Margin="34,150,34,60">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="28"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- الصف العلوي: 4 أزرار -->
+                <!-- الصف العلوي -->
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0" Height="82" Margin="42,0,223,0"
-                Style="{StaticResource NeonBtn}"
-                Content="Cleaner Gameloop"
-                Click="Cleaner_Click" Grid.ColumnSpan="3"/>
+                    <Button Grid.Column="0" Style="{StaticResource NeonBlue}" Click="Cleaner_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="🧹" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="CLEAN GAMELOOP" FontSize="14" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Button>
 
-                    <Button Grid.Column="2" Height="82" Width="175"
-                Style="{StaticResource NeonBtn}"
-                Content="Fix Gl"
-                Click="FixGl_Click"/>
+                    <Button Grid.Column="2" Style="{StaticResource NeonGreen}" Click="FixGl_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="🛠️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="FIX GL" FontSize="14" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Button>
 
-                    <Button Grid.Column="4" Height="82" Width="175"
-                Style="{StaticResource NeonBtn}"
-                Content="Fix Kr"
-                Click="FixKr_Click"/>
+                    <Button Grid.Column="4" Style="{StaticResource NeonPurple}" Click="FixKr_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="🛠️🇰🇷" FontSize="26" HorizontalAlignment="Center"/>
+                            <TextBlock Text="FIX KR" FontSize="14" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Button>
 
-                    <Button Grid.Column="6" Height="82" Margin="12,0,16,0"
-                Style="{StaticResource NeonBtn}"
-                Content="Clear Temp + Cache"
-                Click="ClearTemp_Click"/>
+                    <Button Grid.Column="6" Style="{StaticResource NeonOrange}" Click="ClearTemp_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="🗑️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="CLEAR TEMP" FontSize="14" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Button>
                 </Grid>
 
-                <!-- الصف السفلي: 4 أزرار -->
+                <!-- الصف السفلي -->
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0" Height="82" Margin="42,48,223,-48"
-                Style="{StaticResource NeonBtn}"
-                Content="Install Emu 32"
-                Click="Install32_Click" Grid.ColumnSpan="3"/>
+                    <Button Grid.Column="0" Style="{StaticResource NeonBlue}" Click="Install32_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="⬇️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="INSTALL EMU" FontSize="14" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Button>
 
-                    <Button Grid.Column="2" Height="82" Width="175"
-                Style="{StaticResource NeonBtn}"
-                Content="Fix Error Hax"
-                Click="FixErrorHax_Click" Margin="24,48,23,-48"/>
+                    <Button Grid.Column="2" Style="{StaticResource NeonRed}" Click="FixErrorHax_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="🛡️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="FIX HAX ERROR" FontSize="14" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Button>
 
-                    <Button Grid.Column="4" Height="82" Width="175"
-                Style="{StaticResource NeonBtn}"
-                Content="Reset Guest"
-                Click="ResetGuest_Click" Margin="24,48,24,-48"/>
+                    <Button Grid.Column="4" Style="{StaticResource NeonBlue}" Click="ResetGuest_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="👤" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="RESET GUEST" FontSize="14" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Button>
 
-                    <Button Grid.Column="5" Height="82" Margin="26,48,16,-48"
-                Style="{StaticResource NeonBtn}"
-                Content="AIO FIX"
-                Click="AioFix_Click" Grid.ColumnSpan="2"/>
+                    <Button Grid.Column="6" Style="{StaticResource NeonGreen}" Click="AioFix_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="🛠️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="FIX AIO" FontSize="14" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Grid>
 
+            <!-- ===== شريط الحالة السفلي ===== -->
+            <Grid VerticalAlignment="Bottom" Height="34" Margin="18,0,18,8">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse Width="10" Height="10" Fill="#FF3BFF7A" Margin="4,0,8,0">
+                        <Ellipse.Effect>
+                            <DropShadowEffect x:Name="StatusGlow" Color="#FF3BFF7A" BlurRadius="10" ShadowDepth="0" Opacity="1"/>
+                        </Ellipse.Effect>
+                        <Ellipse.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.3" To="1" Duration="0:0:1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+                    <TextBlock Foreground="#AAFFFFFF" FontSize="13" VerticalAlignment="Center">
+                        <Run Text="System Status: "/>
+                        <Run Text="Optimal" Foreground="#FF3BFF7A" FontWeight="Bold"/>
+                        <Run Text=" | Connected | v2.0.7"/>
+                    </TextBlock>
+                </StackPanel>
+
+                <TextBlock Text="Developed by SHNK" Foreground="#992FB6FF" FontSize="13" FontWeight="SemiBold"
+                           HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" IsEnabled="False"/>
+            </Grid>
 
         </Grid>
     </Border>
