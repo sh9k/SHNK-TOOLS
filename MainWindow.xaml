@@ -350,10 +350,13 @@
             <!-- صورة الخلفية القديمة محفوظة كطبقة تكسچر خفيفة جداً (ما انحذفت) -->
             <Image Source="pack://application:,,,/Assets/ui_bg.jpg" Stretch="UniformToFill" Opacity="0.08"/>
 
-            <!-- نمط شبكي (Grid Pattern) -->
+            <!-- نمط شبكي (Diamond Grid Pattern) بزاوية 45 درجة مثل التصميم المطلوب -->
             <Border CornerRadius="21" ClipToBounds="True">
                 <Border.Background>
-                    <DrawingBrush TileMode="Tile" Viewport="0,0,40,40" ViewportUnits="Absolute" Opacity="0.10">
+                    <DrawingBrush TileMode="Tile" Viewport="0,0,56,56" ViewportUnits="Absolute" Opacity="0.14">
+                        <DrawingBrush.Transform>
+                            <RotateTransform Angle="45" CenterX="28" CenterY="28"/>
+                        </DrawingBrush.Transform>
                         <DrawingBrush.Drawing>
                             <GeometryDrawing>
                                 <GeometryDrawing.Pen>
@@ -361,8 +364,8 @@
                                 </GeometryDrawing.Pen>
                                 <GeometryDrawing.Geometry>
                                     <GeometryGroup>
-                                        <LineGeometry StartPoint="0,0" EndPoint="40,0"/>
-                                        <LineGeometry StartPoint="0,0" EndPoint="0,40"/>
+                                        <LineGeometry StartPoint="0,0" EndPoint="56,0"/>
+                                        <LineGeometry StartPoint="0,0" EndPoint="0,56"/>
                                     </GeometryGroup>
                                 </GeometryDrawing.Geometry>
                             </GeometryDrawing>
@@ -371,10 +374,15 @@
                 </Border.Background>
             </Border>
 
-            <!-- خطوط نيون زخرفية بالزوايا -->
-            <Path Stroke="#552FB6FF" StrokeThickness="2" Data="M 700,30 L 760,30 L 800,70 L 940,70" Opacity="0.7"/>
-            <Path Stroke="#553BFF7A" StrokeThickness="2" Data="M 780,40 L 720,100 L 620,100" Opacity="0.6"/>
-            <Path Stroke="#552FB6FF" StrokeThickness="2" Data="M 40,600 L 40,560 L 100,500 L 260,500" Opacity="0.5"/>
+            <!-- خطوط نيون زخرفية بالزوايا (أعلى يمين) -->
+            <Path Stroke="#772FB6FF" StrokeThickness="2" Data="M 690,26 L 760,26 L 800,66 L 950,66" Opacity="0.85"/>
+            <Path Stroke="#773BFF7A" StrokeThickness="2" Data="M 790,36 L 700,36 L 660,76" Opacity="0.7"/>
+            <Ellipse Width="6" Height="6" Fill="#FF2FB6FF" Margin="686,23,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <Ellipse Width="6" Height="6" Fill="#FF3BFF7A" Margin="946,63,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+
+            <!-- خطوط نيون زخرفية بالزوايا (أسفل يسار) -->
+            <Path Stroke="#772FB6FF" StrokeThickness="2" Data="M 40,600 L 40,560 L 100,500 L 260,500" Opacity="0.6"/>
+            <Ellipse Width="6" Height="6" Fill="#FF2FB6FF" Margin="36,556,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
             <!-- ===== Top bar (سحب + أزرار) ===== -->
             <Grid Height="45" VerticalAlignment="Top" Panel.ZIndex="999">
@@ -393,20 +401,7 @@
             </Grid>
 
             <!-- ===== الشعار SHNK TOOLS + المفتاح ===== -->
-            <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="34,26,0,0">
-
-                <!-- أيقونة المفتاح (رسم متجه حقيقي - مو إيموجي) -->
-                <Path Data="M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z"
-                      Fill="#FF2FB6FF" Stretch="Uniform" Width="46" Height="46"
-                      RenderTransformOrigin="0.5,0.5"
-                      HorizontalAlignment="Left" Margin="150,-14,0,0">
-                    <Path.RenderTransform>
-                        <RotateTransform Angle="-40"/>
-                    </Path.RenderTransform>
-                    <Path.Effect>
-                        <DropShadowEffect Color="#FF2FB6FF" BlurRadius="20" ShadowDepth="0" Opacity="0.9"/>
-                    </Path.Effect>
-                </Path>
+            <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="34,22,0,0">
 
                 <StackPanel>
                     <TextBlock Text="SHNK" FontSize="46" FontWeight="ExtraBold" Foreground="White" FontFamily="Segoe UI Black">
@@ -420,17 +415,35 @@
                         </TextBlock.Effect>
                     </TextBlock>
                 </StackPanel>
+
+                <!-- أيقونة المفتاح (رسم متجه حقيقي - مو إيموجي) فوق حرف SHNK بالضبط -->
+                <Path Data="M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z"
+                      Fill="#FF2FB6FF" Stretch="Uniform" Width="52" Height="52"
+                      RenderTransformOrigin="0.5,0.5"
+                      HorizontalAlignment="Left" VerticalAlignment="Top" Margin="139,26,0,0">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="-7.329"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                    <Path.Effect>
+                        <DropShadowEffect Color="#FF2FB6FF" BlurRadius="22" ShadowDepth="0" Opacity="1"/>
+                    </Path.Effect>
+                </Path>
             </Grid>
 
             <!-- ===== OPTIMIZATION UTILITY ===== -->
-            <TextBlock Text="OPTIMIZATION UTILITY" Foreground="#772FB6FF" FontSize="15" FontWeight="SemiBold"
-                       HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,52,40,0"/>
+            <TextBlock Text="OPTIMIZATION UTILITY" Foreground="#992FB6FF" FontSize="15" FontWeight="SemiBold"
+                       HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,40,0"/>
 
             <!-- ===== الأزرار (نفس الـ Click handlers الأصلية) ===== -->
-            <Grid VerticalAlignment="Top" Margin="34,150,34,60">
+            <Grid VerticalAlignment="Top" Margin="34,150,34,55">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="18"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -438,17 +451,17 @@
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="18"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="18"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="18"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="0" Style="{StaticResource NeonBlue}" Click="Cleaner_Click">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="🧹" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="🧹" FontFamily="Segoe UI Emoji" FontSize="30" HorizontalAlignment="Center"/>
                             <TextBlock Text="CLEAN GAMELOOP" FontSize="14" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
                         </StackPanel>
@@ -456,7 +469,7 @@
 
                     <Button Grid.Column="2" Style="{StaticResource NeonGreen}" Click="FixGl_Click">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="🛠️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="🛠️" FontFamily="Segoe UI Emoji" FontSize="30" HorizontalAlignment="Center"/>
                             <TextBlock Text="FIX GL" FontSize="14" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
                         </StackPanel>
@@ -464,7 +477,7 @@
 
                     <Button Grid.Column="4" Style="{StaticResource NeonPurple}" Click="FixKr_Click">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="🛠️🇰🇷" FontSize="26" HorizontalAlignment="Center"/>
+                            <TextBlock Text="🛠️" FontFamily="Segoe UI Emoji" FontSize="26" HorizontalAlignment="Center"/>
                             <TextBlock Text="FIX KR" FontSize="14" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
                         </StackPanel>
@@ -472,7 +485,7 @@
 
                     <Button Grid.Column="6" Style="{StaticResource NeonOrange}" Click="ClearTemp_Click">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="🗑️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="🗑️" FontFamily="Segoe UI Emoji" FontSize="30" HorizontalAlignment="Center"/>
                             <TextBlock Text="CLEAR TEMP" FontSize="14" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
                         </StackPanel>
@@ -483,41 +496,41 @@
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="18"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="18"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="18"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0" Style="{StaticResource NeonBlue}" Click="Install32_Click">
+                    <Button Grid.Column="0" Style="{StaticResource NeonBlue}" Click="Install32_Click" Margin="0,14,0,-14">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="⬇️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="⬇️" FontFamily="Segoe UI Emoji" FontSize="30" HorizontalAlignment="Center"/>
                             <TextBlock Text="INSTALL EMU" FontSize="14" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
                         </StackPanel>
                     </Button>
 
-                    <Button Grid.Column="2" Style="{StaticResource NeonRed}" Click="FixErrorHax_Click">
+                    <Button Grid.Column="2" Style="{StaticResource NeonRed}" Click="FixErrorHax_Click" Margin="0,14,0,-14">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="🛡️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="🛡️" FontFamily="Segoe UI Emoji" FontSize="30" HorizontalAlignment="Center"/>
                             <TextBlock Text="FIX HAX ERROR" FontSize="14" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
                         </StackPanel>
                     </Button>
 
-                    <Button Grid.Column="4" Style="{StaticResource NeonBlue}" Click="ResetGuest_Click">
+                    <Button Grid.Column="4" Style="{StaticResource NeonBlue}" Click="ResetGuest_Click" Margin="0,14,0,-14">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="👤" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="👤" FontFamily="Segoe UI Emoji" FontSize="30" HorizontalAlignment="Center"/>
                             <TextBlock Text="RESET GUEST" FontSize="14" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
                         </StackPanel>
                     </Button>
 
-                    <Button Grid.Column="6" Style="{StaticResource NeonGreen}" Click="AioFix_Click">
+                    <Button Grid.Column="6" Style="{StaticResource NeonGreen}" Click="AioFix_Click" Margin="0,14,0,-14">
                         <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="🛠️" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="🛠️" FontFamily="Segoe UI Emoji" FontSize="30" HorizontalAlignment="Center"/>
                             <TextBlock Text="FIX AIO" FontSize="14" FontWeight="Bold" Foreground="White"
                                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
                         </StackPanel>
@@ -545,7 +558,7 @@
                     <TextBlock Foreground="#AAFFFFFF" FontSize="13" VerticalAlignment="Center">
                         <Run Text="System Status: "/>
                         <Run Text="Optimal" Foreground="#FF3BFF7A" FontWeight="Bold"/>
-                        <Run Text=" | Connected | v2.0.7"/>
+                        <Run Text=" | Connected | v2.0.8"/>
                     </TextBlock>
                 </StackPanel>
 
