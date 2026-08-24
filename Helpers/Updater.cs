@@ -20,18 +20,18 @@ namespace SHNK.Tools.App
         private const string Owner = "sh9k";
         private const string Repo = "SHNK-TOOLS";
 
-        // اسم ملف التحديث يجب أن يحتوي win-x64
         private const string AssetNameMustContain = "win-x64";
         private const string AssetExt = ".zip";
 
         // =========================================================
-        // HTTP CLIENT
+        // HTTP
         // =========================================================
 
-        private static readonly HttpClient _http = new HttpClient
-        {
-            Timeout = TimeSpan.FromMinutes(30)
-        };
+        private static readonly HttpClient _http =
+            new HttpClient
+            {
+                Timeout = TimeSpan.FromMinutes(30)
+            };
 
         // =========================================================
         // CURRENT VERSION
@@ -45,7 +45,7 @@ namespace SHNK.Tools.App
                 ?? new Version(1, 0, 0, 0);
 
         // =========================================================
-        // CHECK UPDATE
+        // CHECK FOR UPDATE
         // =========================================================
 
         public static async Task CheckAndPromptAsync(
@@ -54,28 +54,29 @@ namespace SHNK.Tools.App
         {
             try
             {
-                info("Updater: Checking for updates...");
+                info(
+                    "Updater: Checking for updates..."
+                );
 
                 GitHubRelease? latest =
                     await GetLatestReleaseAsync();
 
                 if (latest == null)
                 {
-                    info("Updater: No releases found.");
+                    info(
+                        "Updater: No releases found."
+                    );
+
                     return;
                 }
-
-                // =====================================================
-                // PARSE VERSION
-                // =====================================================
 
                 if (!TryParseVersion(
                     latest.tag_name,
                     out Version latestVer))
                 {
                     info(
-                        $"Updater: Can't parse tag version: " +
-                        $"{latest.tag_name ?? "(null)"}"
+                        "Updater: Can't parse release version: " +
+                        (latest.tag_name ?? "(null)")
                     );
 
                     return;
@@ -87,7 +88,7 @@ namespace SHNK.Tools.App
                 );
 
                 // =====================================================
-                // ALREADY UP TO DATE
+                // ALREADY UPDATED
                 // =====================================================
 
                 if (latestVer <= CurrentVersion)
@@ -102,7 +103,7 @@ namespace SHNK.Tools.App
                 }
 
                 // =====================================================
-                // FIND ZIP ASSET
+                // FIND ZIP
                 // =====================================================
 
                 GitHubAsset? asset =
@@ -111,8 +112,7 @@ namespace SHNK.Tools.App
                 if (asset == null)
                 {
                     info(
-                        "Updater: No suitable win-x64 ZIP " +
-                        "asset found in release."
+                        "Updater: No suitable win-x64 ZIP asset found."
                     );
 
                     return;
@@ -129,15 +129,14 @@ namespace SHNK.Tools.App
                 }
 
                 // =====================================================
-                // CONFIRM UPDATE
+                // ASK USER
                 // =====================================================
 
                 string msg =
                     "A new SHNK TOOLS update is available!\n\n" +
                     $"Current version: {CurrentVersion}\n" +
                     $"New version:     {latestVer}\n\n" +
-                    "The update will be downloaded and installed.\n\n" +
-                    "Continue?";
+                    "Download and install now?";
 
                 bool accepted =
                     confirm(
@@ -147,7 +146,10 @@ namespace SHNK.Tools.App
 
                 if (!accepted)
                 {
-                    info("Updater: User cancelled update.");
+                    info(
+                        "Updater: User cancelled update."
+                    );
+
                     return;
                 }
 
@@ -164,7 +166,7 @@ namespace SHNK.Tools.App
             catch (OperationCanceledException)
             {
                 info(
-                    "Updater: Update download cancelled."
+                    "Updater: Update cancelled."
                 );
             }
             catch (Exception ex)
@@ -185,10 +187,6 @@ namespace SHNK.Tools.App
             Version latestVer,
             Action<string> info)
         {
-            // =====================================================
-            // CACHE
-            // =====================================================
-
             string cache =
                 Paths.CacheDir();
 
@@ -200,38 +198,45 @@ namespace SHNK.Tools.App
                     $"update_{latestVer}.zip"
                 );
 
+            string tempDownloadPath =
+                zipPath + ".download";
+
             string extractDir =
                 Path.Combine(
                     cache,
                     $"update_{latestVer}_extracted"
                 );
 
-            // =====================================================
-            // CREATE DOWNLOAD WINDOW
-            // =====================================================
-
             DownloadProgressWindow? progressWindow = null;
 
             try
             {
-                Window? owner =
-                    Application.Current?.MainWindow;
+                // =====================================================
+                // CLEAN OLD FILES
+                // =====================================================
+
+                TryDeleteFile(zipPath);
+                TryDeleteFile(tempDownloadPath);
+                TryDeleteDirectory(extractDir);
+
+                // =====================================================
+                // CREATE DOWNLOAD WINDOW
+                // =====================================================
 
                 progressWindow =
                     new DownloadProgressWindow(
                         "SHNK TOOLS UPDATE",
-                        $"Downloading update v{latestVer}..."
+                        $"Downloading v{latestVer}..."
                     );
+
+                Window? owner =
+                    Application.Current?.MainWindow;
 
                 if (owner != null &&
                     owner != progressWindow)
                 {
                     progressWindow.Owner = owner;
                 }
-
-                // =================================================
-                // PROGRESS
-                // =================================================
 
                 var progress =
                     new Progress<DownloadProgress>(
@@ -246,13 +251,8 @@ namespace SHNK.Tools.App
                             }
                             catch
                             {
-                                // Ignore UI update errors
                             }
                         });
-
-                // =================================================
-                // SHOW WINDOW
-                // =================================================
 
                 progressWindow.Show();
 
@@ -260,9 +260,9 @@ namespace SHNK.Tools.App
                     "Updater: Downloading update..."
                 );
 
-                // =================================================
+                // =====================================================
                 // DOWNLOAD
-                // =================================================
+                // =====================================================
 
                 await DownloadFileAsync(
                     url,
@@ -271,38 +271,51 @@ namespace SHNK.Tools.App
                     progressWindow.CancellationToken
                 );
 
-                // =================================================
-                // DOWNLOAD COMPLETED
-                // =================================================
+                // =====================================================
+                // VERIFY ZIP EXISTS
+                // =====================================================
+
+                if (!File.Exists(zipPath))
+                {
+                    throw new InvalidOperationException(
+                        "Update download completed, but the ZIP file was not created."
+                    );
+                }
+
+                FileInfo downloadedFile =
+                    new FileInfo(zipPath);
+
+                if (downloadedFile.Length <= 0)
+                {
+                    throw new InvalidOperationException(
+                        "The downloaded update ZIP is empty."
+                    );
+                }
 
                 info(
-                    "Updater: Download completed."
+                    $"Updater: Download completed. " +
+                    $"Size={FormatBytes(downloadedFile.Length)}"
                 );
+
+                // =====================================================
+                // SET UI COMPLETED
+                // =====================================================
 
                 progressWindow.SetCompleted();
 
-                await Task.Delay(900);
+                await Task.Delay(500);
 
-                if (progressWindow.IsVisible)
-                {
-                    progressWindow.Close();
-                }
-
-                // =================================================
+                // =====================================================
                 // EXTRACT
-                // =================================================
+                // =====================================================
+
+                progressWindow.SetStatus(
+                    "Extracting update..."
+                );
 
                 info(
                     "Updater: Extracting update..."
                 );
-
-                if (Directory.Exists(extractDir))
-                {
-                    Directory.Delete(
-                        extractDir,
-                        true
-                    );
-                }
 
                 Directory.CreateDirectory(
                     extractDir
@@ -310,12 +323,13 @@ namespace SHNK.Tools.App
 
                 ZipFile.ExtractToDirectory(
                     zipPath,
-                    extractDir
+                    extractDir,
+                    true
                 );
 
-                // =================================================
+                // =====================================================
                 // FIND EXE
-                // =================================================
+                // =====================================================
 
                 string? newRoot =
                     FindFolderContainingExe(
@@ -325,23 +339,27 @@ namespace SHNK.Tools.App
                 if (string.IsNullOrWhiteSpace(newRoot))
                 {
                     throw new InvalidOperationException(
-                        "Update package doesn't contain an .exe."
+                        "Update package doesn't contain an .exe file."
                     );
                 }
 
-                // =================================================
-                // CURRENT EXE
-                // =================================================
+                info(
+                    "Updater: New application root: " +
+                    newRoot
+                );
 
-                Process currentProcess =
-                    Process.GetCurrentProcess();
+                // =====================================================
+                // CURRENT EXE
+                // =====================================================
 
                 string? currentExe =
-                    currentProcess
+                    Process
+                        .GetCurrentProcess()
                         .MainModule?
                         .FileName;
 
-                if (string.IsNullOrWhiteSpace(currentExe))
+                if (string.IsNullOrWhiteSpace(
+                    currentExe))
                 {
                     throw new InvalidOperationException(
                         "Unable to determine current application path."
@@ -353,7 +371,8 @@ namespace SHNK.Tools.App
                         currentExe
                     );
 
-                if (string.IsNullOrWhiteSpace(currentDir))
+                if (string.IsNullOrWhiteSpace(
+                    currentDir))
                 {
                     throw new InvalidOperationException(
                         "Unable to determine current application directory."
@@ -365,12 +384,16 @@ namespace SHNK.Tools.App
                         currentExe
                     );
 
-                // =================================================
-                // CREATE UPDATE BAT
-                // =================================================
+                // =====================================================
+                // PREPARE BAT
+                // =====================================================
+
+                progressWindow.SetStatus(
+                    "Preparing installation..."
+                );
 
                 info(
-                    "Updater: Preparing update installer..."
+                    "Updater: Preparing installation..."
                 );
 
                 string batPath =
@@ -388,50 +411,76 @@ namespace SHNK.Tools.App
                     )
                 );
 
-                // =================================================
-                // APPLY UPDATE
-                // =================================================
+                if (!File.Exists(batPath))
+                {
+                    throw new InvalidOperationException(
+                        "Failed to create update script."
+                    );
+                }
+
+                // =====================================================
+                // INSTALLING
+                // =====================================================
+
+                progressWindow.SetStatus(
+                    "Installing update..."
+                );
 
                 info(
                     "Updater: Applying update..."
                 );
 
-                Process.Start(
-                    new ProcessStartInfo
-                    {
-                        FileName = "cmd.exe",
-                        Arguments =
-                            $"/c \"{batPath}\"",
-                        UseShellExecute = true,
-                        CreateNoWindow = true,
-                        WindowStyle =
-                            ProcessWindowStyle.Hidden
-                    }
-                );
+                Process? updaterProcess =
+                    Process.Start(
+                        new ProcessStartInfo
+                        {
+                            FileName = "cmd.exe",
+                            Arguments =
+                                $"/c \"{batPath}\"",
+                            UseShellExecute = true,
+                            CreateNoWindow = true,
+                            WindowStyle =
+                                ProcessWindowStyle.Hidden
+                        }
+                    );
 
-                // =================================================
-                // EXIT CURRENT APPLICATION
-                // =================================================
+                if (updaterProcess == null)
+                {
+                    throw new InvalidOperationException(
+                        "Failed to start update installer."
+                    );
+                }
+
+                // =====================================================
+                // GIVE BAT TIME TO START
+                // =====================================================
+
+                await Task.Delay(700);
+
+                // =====================================================
+                // CLOSE CURRENT APP
+                // =====================================================
 
                 info(
-                    "Updater: Restarting SHNK TOOLS..."
+                    "Updater: Closing current application..."
                 );
+
+                if (progressWindow.IsVisible)
+                {
+                    progressWindow.Close();
+                }
 
                 Environment.Exit(0);
             }
             catch (OperationCanceledException)
             {
                 info(
-                    "Updater: Download cancelled by user."
+                    "Updater: Update download cancelled by user."
                 );
 
-                TryDeleteFile(
-                    zipPath
-                );
-
-                TryDeleteDirectory(
-                    extractDir
-                );
+                TryDeleteFile(zipPath);
+                TryDeleteFile(tempDownloadPath);
+                TryDeleteDirectory(extractDir);
 
                 if (progressWindow != null &&
                     progressWindow.IsVisible)
@@ -454,7 +503,7 @@ namespace SHNK.Tools.App
         }
 
         // =========================================================
-        // DOWNLOAD WITH REAL PROGRESS
+        // REAL DOWNLOAD WITH PROGRESS
         // =========================================================
 
         private static async Task DownloadFileAsync(
@@ -468,15 +517,21 @@ namespace SHNK.Tools.App
                     destination
                 );
 
-            if (!string.IsNullOrWhiteSpace(directory))
+            if (!string.IsNullOrWhiteSpace(
+                directory))
             {
                 Directory.CreateDirectory(
                     directory
                 );
             }
 
+            string tempPath =
+                destination + ".download";
+
+            TryDeleteFile(tempPath);
+
             // =====================================================
-            // HTTP REQUEST
+            // REQUEST
             // =====================================================
 
             using HttpRequestMessage request =
@@ -487,6 +542,10 @@ namespace SHNK.Tools.App
 
             request.Headers.UserAgent.ParseAdd(
                 "SHNK-TOOLS-Updater"
+            );
+
+            request.Headers.Accept.ParseAdd(
+                "application/octet-stream"
             );
 
             using HttpResponseMessage response =
@@ -501,198 +560,210 @@ namespace SHNK.Tools.App
             long? totalBytes =
                 response.Content.Headers.ContentLength;
 
-            // =====================================================
-            // TEMP DOWNLOAD FILE
-            // =====================================================
-
-            string tempPath =
-                destination + ".download";
-
-            TryDeleteFile(
-                tempPath
-            );
-
-            // =====================================================
-            // STREAMS
-            // =====================================================
-
-            await using Stream source =
-                await response.Content.ReadAsStreamAsync(
-                    cancellationToken
-                );
-
-            await using FileStream destinationStream =
-                new FileStream(
-                    tempPath,
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.None,
-                    1024 * 64,
-                    FileOptions.Asynchronous |
-                    FileOptions.SequentialScan
-                );
-
-            // =====================================================
-            // BUFFER
-            // =====================================================
-
-            byte[] buffer =
-                new byte[1024 * 64];
-
             long downloadedBytes = 0;
 
             Stopwatch stopwatch =
                 Stopwatch.StartNew();
 
-            long lastBytes = 0;
-
-            TimeSpan lastUpdate =
+            TimeSpan lastProgressUpdate =
                 TimeSpan.Zero;
 
             // =====================================================
-            // DOWNLOAD LOOP
+            // DOWNLOAD STREAM
             // =====================================================
 
-            while (true)
-            {
-                int read =
-                    await source.ReadAsync(
-                        buffer.AsMemory(
-                            0,
-                            buffer.Length
-                        ),
+            await using (
+                Stream source =
+                    await response.Content.ReadAsStreamAsync(
                         cancellationToken
-                    );
-
-                if (read == 0)
-                    break;
-
-                await destinationStream.WriteAsync(
-                    buffer.AsMemory(
-                        0,
-                        read
-                    ),
-                    cancellationToken
-                );
-
-                downloadedBytes += read;
-
-                TimeSpan elapsed =
-                    stopwatch.Elapsed;
-
-                // تحديث الواجهة تقريباً كل 100ms
-                // حتى تكون الحركة ناعمة بدون ضغط على UI
-                if (
-                    elapsed - lastUpdate >=
-                    TimeSpan.FromMilliseconds(100)
-                )
+                    ))
+            {
+                await using (
+                    FileStream destinationStream =
+                        new FileStream(
+                            tempPath,
+                            FileMode.Create,
+                            FileAccess.Write,
+                            FileShare.None,
+                            64 * 1024,
+                            FileOptions.Asynchronous |
+                            FileOptions.SequentialScan
+                        ))
                 {
-                    lastUpdate =
-                        elapsed;
+                    byte[] buffer =
+                        new byte[64 * 1024];
 
-                    // =================================================
-                    // SPEED
-                    // =================================================
+                    while (true)
+                    {
+                        int read =
+                            await source.ReadAsync(
+                                buffer.AsMemory(
+                                    0,
+                                    buffer.Length
+                                ),
+                                cancellationToken
+                            );
 
-                    double seconds =
-                        Math.Max(
-                            elapsed.TotalSeconds,
-                            0.001
+                        if (read == 0)
+                            break;
+
+                        await destinationStream.WriteAsync(
+                            buffer.AsMemory(
+                                0,
+                                read
+                            ),
+                            cancellationToken
                         );
 
-                    double bytesPerSecond =
-                        downloadedBytes /
-                        seconds;
+                        downloadedBytes += read;
 
-                    // =================================================
-                    // PERCENTAGE
-                    // =================================================
+                        TimeSpan elapsed =
+                            stopwatch.Elapsed;
 
-                    double? percentage = null;
-
-                    if (totalBytes.HasValue &&
-                        totalBytes.Value > 0)
-                    {
-                        percentage =
-                            downloadedBytes * 100.0 /
-                            totalBytes.Value;
-                    }
-
-                    // =================================================
-                    // REMAINING TIME
-                    // =================================================
-
-                    string remainingText =
-                        "Calculating...";
-
-                    if (
-                        totalBytes.HasValue &&
-                        totalBytes.Value > downloadedBytes &&
-                        bytesPerSecond > 0
-                    )
-                    {
-                        long remainingBytes =
-                            totalBytes.Value -
-                            downloadedBytes;
-
-                        double remainingSeconds =
-                            remainingBytes /
-                            bytesPerSecond;
-
-                        remainingText =
-                            FormatTime(
-                                remainingSeconds
-                            );
-                    }
-
-                    // =================================================
-                    // PROGRESS OBJECT
-                    // =================================================
-
-                    DownloadProgress progressData =
-                        new DownloadProgress
+                        if (
+                            elapsed -
+                            lastProgressUpdate >=
+                            TimeSpan.FromMilliseconds(100)
+                        )
                         {
-                            Percentage =
-                                percentage,
+                            lastProgressUpdate =
+                                elapsed;
 
-                            DownloadedText =
-                                FormatBytes(
-                                    downloadedBytes
-                                ),
+                            ReportProgress(
+                                progress,
+                                downloadedBytes,
+                                totalBytes,
+                                elapsed
+                            );
+                        }
+                    }
 
-                            TotalText =
-                                totalBytes.HasValue
-                                    ? FormatBytes(
-                                        totalBytes.Value
-                                      )
-                                    : "Unknown",
-
-                            SpeedText =
-                                FormatSpeed(
-                                    bytesPerSecond
-                                ),
-
-                            RemainingText =
-                                remainingText
-                        };
-
-                    progress?.Report(
-                        progressData
+                    await destinationStream.FlushAsync(
+                        cancellationToken
                     );
-
-                    lastBytes =
-                        downloadedBytes;
                 }
             }
 
             // =====================================================
-            // FINAL PROGRESS
+            // IMPORTANT:
+            // STREAMS ARE CLOSED NOW
             // =====================================================
 
-            progress?.Report(
+            cancellationToken.ThrowIfCancellationRequested();
+
+            ReportProgress(
+                progress,
+                downloadedBytes,
+                totalBytes,
+                stopwatch.Elapsed,
+                forceComplete: true
+            );
+
+            // =====================================================
+            // TEMP FILE -> FINAL ZIP
+            // =====================================================
+
+            TryDeleteFile(destination);
+
+            File.Move(
+                tempPath,
+                destination
+            );
+
+            // =====================================================
+            // VERIFY FINAL FILE
+            // =====================================================
+
+            if (!File.Exists(destination))
+            {
+                throw new IOException(
+                    "Downloaded file could not be finalized."
+                );
+            }
+        }
+
+        // =========================================================
+        // REPORT DOWNLOAD PROGRESS
+        // =========================================================
+
+        private static void ReportProgress(
+            IProgress<DownloadProgress>? progress,
+            long downloadedBytes,
+            long? totalBytes,
+            TimeSpan elapsed,
+            bool forceComplete = false)
+        {
+            if (progress == null)
+                return;
+
+            double seconds =
+                Math.Max(
+                    elapsed.TotalSeconds,
+                    0.001
+                );
+
+            double speed =
+                downloadedBytes /
+                seconds;
+
+            double? percentage = null;
+
+            if (
+                totalBytes.HasValue &&
+                totalBytes.Value > 0
+            )
+            {
+                percentage =
+                    downloadedBytes *
+                    100.0 /
+                    totalBytes.Value;
+
+                percentage =
+                    Math.Clamp(
+                        percentage.Value,
+                        0,
+                        100
+                    );
+
+                if (forceComplete)
+                {
+                    percentage = 100;
+                }
+            }
+
+            string remainingText =
+                "Calculating...";
+
+            if (
+                totalBytes.HasValue &&
+                totalBytes.Value > downloadedBytes &&
+                speed > 0
+            )
+            {
+                long remainingBytes =
+                    totalBytes.Value -
+                    downloadedBytes;
+
+                double remainingSeconds =
+                    remainingBytes /
+                    speed;
+
+                remainingText =
+                    FormatTime(
+                        remainingSeconds
+                    );
+            }
+            else if (forceComplete)
+            {
+                remainingText =
+                    "Completed";
+            }
+
+            progress.Report(
                 new DownloadProgress
                 {
-                    Percentage = 100,
+                    Percentage =
+                        percentage,
 
                     DownloadedText =
                         FormatBytes(
@@ -703,135 +774,22 @@ namespace SHNK.Tools.App
                         totalBytes.HasValue
                             ? FormatBytes(
                                 totalBytes.Value
-                              )
-                            : FormatBytes(
-                                downloadedBytes
-                              ),
+                            )
+                            : "Unknown",
 
                     SpeedText =
                         FormatSpeed(
-                            downloadedBytes /
-                            Math.Max(
-                                stopwatch.Elapsed.TotalSeconds,
-                                0.001
-                            )
+                            speed
                         ),
 
                     RemainingText =
-                        "Completed"
+                        remainingText
                 }
             );
-
-            await destinationStream.FlushAsync(
-                cancellationToken
-            );
-
-            // =====================================================
-            // REPLACE FINAL FILE
-            // =====================================================
-
-            TryDeleteFile(
-                destination
-            );
-
-            File.Move(
-                tempPath,
-                destination
-            );
         }
 
         // =========================================================
-        // FORMAT BYTES
-        // =========================================================
-
-        private static string FormatBytes(
-            long bytes)
-        {
-            if (bytes < 1024)
-                return $"{bytes} B";
-
-            if (bytes < 1024 * 1024)
-                return
-                    $"{bytes / 1024.0:0.0} KB";
-
-            if (bytes < 1024L * 1024L * 1024L)
-                return
-                    $"{bytes / 1024.0 / 1024.0:0.00} MB";
-
-            return
-                $"{bytes / 1024.0 / 1024.0 / 1024.0:0.00} GB";
-        }
-
-        // =========================================================
-        // FORMAT SPEED
-        // =========================================================
-
-        private static string FormatSpeed(
-            double bytesPerSecond)
-        {
-            if (bytesPerSecond < 1024)
-            {
-                return
-                    $"{bytesPerSecond:0} B/s";
-            }
-
-            if (
-                bytesPerSecond <
-                1024 * 1024
-            )
-            {
-                return
-                    $"{bytesPerSecond / 1024.0:0.00} KB/s";
-            }
-
-            if (
-                bytesPerSecond <
-                1024L * 1024L * 1024L
-            )
-            {
-                return
-                    $"{bytesPerSecond / 1024.0 / 1024.0:0.00} MB/s";
-            }
-
-            return
-                $"{bytesPerSecond / 1024.0 / 1024.0 / 1024.0:0.00} GB/s";
-        }
-
-        // =========================================================
-        // FORMAT TIME
-        // =========================================================
-
-        private static string FormatTime(
-            double seconds)
-        {
-            if (double.IsNaN(seconds) ||
-                double.IsInfinity(seconds) ||
-                seconds < 0)
-            {
-                return "Calculating...";
-            }
-
-            TimeSpan time =
-                TimeSpan.FromSeconds(
-                    seconds
-                );
-
-            if (time.TotalHours >= 1)
-            {
-                return
-                    time.ToString(
-                        @"hh\:mm\:ss"
-                    );
-            }
-
-            return
-                time.ToString(
-                    @"mm\:ss"
-                );
-        }
-
-        // =========================================================
-        // UPDATE BAT
+        // UPDATE SCRIPT
         // =========================================================
 
         private static string BuildUpdateBat(
@@ -841,26 +799,42 @@ namespace SHNK.Tools.App
         {
             return $"""
 @echo off
-setlocal
+setlocal EnableExtensions
 
 REM =========================================================
-REM SHNK TOOLS UPDATE SCRIPT
+REM SHNK TOOLS UPDATE
 REM =========================================================
 
-REM Wait for old application to close
+REM Wait for the old application to close
 timeout /t 2 /nobreak >nul
 
 REM =========================================================
-REM COPY NEW FILES
+REM COPY NEW VERSION
 REM =========================================================
 
-robocopy "{newRoot}" "{currentDir}" /E /R:3 /W:1 >nul
+robocopy "{newRoot}" "{currentDir}" /E /R:5 /W:1 /NFL /NDL /NJH /NJS /NP >nul
 
 REM =========================================================
-REM START NEW VERSION
+REM CHECK COPY RESULT
+REM =========================================================
+
+if %ERRORLEVEL% GEQ 8 (
+    timeout /t 2 /nobreak >nul
+)
+
+REM =========================================================
+REM START UPDATED APPLICATION
 REM =========================================================
 
 start "" "{Path.Combine(currentDir, exeName)}"
+
+REM =========================================================
+REM CLEAN UPDATE FILES
+REM =========================================================
+
+timeout /t 3 /nobreak >nul
+
+del /f /q "%~f0"
 
 endlocal
 exit
@@ -891,15 +865,18 @@ exit
                         exe
                     );
 
-                if (!string.IsNullOrWhiteSpace(folder))
+                if (!string.IsNullOrWhiteSpace(
+                    folder))
+                {
                     return folder;
+                }
             }
 
             return null;
         }
 
         // =========================================================
-        // GITHUB API
+        // GITHUB LATEST RELEASE
         // =========================================================
 
         private static async Task<GitHubRelease?> GetLatestReleaseAsync()
@@ -928,9 +905,7 @@ exit
                 );
 
             if (!response.IsSuccessStatusCode)
-            {
                 return null;
-            }
 
             string json =
                 await response.Content.ReadAsStringAsync();
@@ -956,8 +931,11 @@ exit
                     0
                 );
 
-            if (string.IsNullOrWhiteSpace(tag))
+            if (string.IsNullOrWhiteSpace(
+                tag))
+            {
                 return false;
+            }
 
             tag =
                 tag.Trim();
@@ -980,7 +958,7 @@ exit
         }
 
         // =========================================================
-        // PICK ZIP ASSET
+        // FIND ZIP ASSET
         // =========================================================
 
         private static GitHubAsset? PickZipAsset(
@@ -995,8 +973,7 @@ exit
             {
                 if (
                     string.IsNullOrWhiteSpace(
-                        asset.name
-                    )
+                        asset.name)
                 )
                 {
                     continue;
@@ -1004,8 +981,7 @@ exit
 
                 if (
                     string.IsNullOrWhiteSpace(
-                        asset.browser_download_url
-                    )
+                        asset.browser_download_url)
                 )
                 {
                     continue;
@@ -1017,7 +993,7 @@ exit
                         StringComparison.OrdinalIgnoreCase
                     );
 
-                bool containsWinX64 =
+                bool isWinX64 =
                     asset.name.Contains(
                         AssetNameMustContain,
                         StringComparison.OrdinalIgnoreCase
@@ -1025,7 +1001,7 @@ exit
 
                 if (
                     isZip &&
-                    containsWinX64
+                    isWinX64
                 )
                 {
                     return asset;
@@ -1036,7 +1012,100 @@ exit
         }
 
         // =========================================================
-        // CLEANUP
+        // FORMAT BYTES
+        // =========================================================
+
+        private static string FormatBytes(
+            long bytes)
+        {
+            if (bytes < 1024)
+                return $"{bytes} B";
+
+            if (bytes < 1024 * 1024)
+                return
+                    $"{bytes / 1024.0:0.0} KB";
+
+            if (
+                bytes <
+                1024L * 1024L * 1024L)
+            {
+                return
+                    $"{bytes / 1024.0 / 1024.0:0.00} MB";
+            }
+
+            return
+                $"{bytes / 1024.0 / 1024.0 / 1024.0:0.00} GB";
+        }
+
+        // =========================================================
+        // FORMAT SPEED
+        // =========================================================
+
+        private static string FormatSpeed(
+            double bytesPerSecond)
+        {
+            if (bytesPerSecond < 1024)
+            {
+                return
+                    $"{bytesPerSecond:0} B/s";
+            }
+
+            if (
+                bytesPerSecond <
+                1024 * 1024)
+            {
+                return
+                    $"{bytesPerSecond / 1024.0:0.00} KB/s";
+            }
+
+            if (
+                bytesPerSecond <
+                1024L * 1024L * 1024L)
+            {
+                return
+                    $"{bytesPerSecond / 1024.0 / 1024.0:0.00} MB/s";
+            }
+
+            return
+                $"{bytesPerSecond / 1024.0 / 1024.0 / 1024.0:0.00} GB/s";
+        }
+
+        // =========================================================
+        // FORMAT TIME
+        // =========================================================
+
+        private static string FormatTime(
+            double seconds)
+        {
+            if (
+                double.IsNaN(seconds) ||
+                double.IsInfinity(seconds) ||
+                seconds < 0)
+            {
+                return "Calculating...";
+            }
+
+            TimeSpan time =
+                TimeSpan.FromSeconds(
+                    seconds
+                );
+
+            if (time.TotalHours >= 1)
+            {
+                return
+                    time.ToString(
+                        @"hh\:mm\:ss"
+                    );
+            }
+
+            return
+                time.ToString(
+                    @"mm\:ss"
+                );
+        }
+
+        // =========================================================
+        // DELETE FILE
         // =========================================================
 
         private static void TryDeleteFile(
@@ -1051,9 +1120,12 @@ exit
             }
             catch
             {
-                // Ignore cleanup errors
             }
         }
+
+        // =========================================================
+        // DELETE DIRECTORY
+        // =========================================================
 
         private static void TryDeleteDirectory(
             string path)
@@ -1070,7 +1142,6 @@ exit
             }
             catch
             {
-                // Ignore cleanup errors
             }
         }
 
