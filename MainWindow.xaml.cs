@@ -1053,64 +1053,51 @@ namespace SHNK.Tools.App
                 };
 
             w.OnPickAsync =
-                async region =>
+                async (region, log) =>
                 {
-                    await RunResetGuestBatAsync(
-                        region
-                    );
+                    await RunResetGuestBatAsync(region, log);
                 };
 
             w.ShowDialog();
         }
 
         private async Task RunResetGuestBatAsync(
-            string region)
+            string region,
+            Action<string> log)
         {
+            if (!ConfirmDanger(
+                $"⚠ Reset Guest ({region}) Will Run Now?\n\n" +
+                "• ADB will restart\n" +
+                "• Device ID will refresh\n" +
+                "• Game cache will clean\n\n" +
+                "Proceed?"
+            ))
+            {
+                throw new OperationCanceledException();
+            }
+
+            log($"Preparing {region} script...");
+
+            string bat =
+                ExtractEmbeddedFile(
+                    $"Shnk_Tools.Assets.reset_guest.{region}.bat",
+                    $"{region}.bat"
+                );
+
+            Logger.Log($"Running {region}.bat");
+            log($"Running {region}.bat");
+
             try
             {
-                if (!ConfirmDanger(
-                    $"⚠ Reset Guest ({region}) Will Run Now?\n\n" +
-                    "• ADB will restart\n" +
-                    "• Device ID will refresh\n" +
-                    "• Game cache will clean\n\n" +
-                    "Proceed?"
-                ))
-                {
-                    return;
-                }
-
-                string bat =
-                    ExtractEmbeddedFile(
-                        $"Shnk_Tools.Assets.reset_guest.{region}.bat",
-                        $"{region}.bat"
-                    );
-
-                Logger.Log(
-                    $"Running {region}.bat"
-                );
-
-                await ScriptRunner.RunBatWithLiveLog(
-                    bat
-                );
-
-                MessageBox.Show(
-                    $"{region} completed successfully.",
-                    "SHNK TOOLS"
-                );
+                await ScriptRunner.RunBatWithLiveLog(bat, log);
             }
             catch (Exception ex)
             {
-                Logger.Log(
-                    "ResetGuest ERROR: " +
-                    ex
-                );
-
-                MessageBox.Show(
-                    ex.ToString(),
-                    "Error"
-                );
+                Logger.Log("ResetGuest ERROR: " + ex);
+                throw;
             }
         }
+
 
         // =========================================================
         // CONFIRM

@@ -2,26 +2,146 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Reset Guest"
-        Width="250" Height="250"
+        Width="360" Height="380"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         WindowStyle="ToolWindow"
-        Background="#111111">
+        Background="#FF060A14">
 
-    <Grid Margin="16,-5,16,37">
+    <Window.Resources>
+
+        <Style x:Key="RegionBtnBase" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="46"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style x:Key="RegionBlue" BasedOn="{StaticResource RegionBtnBase}" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="10" BorderThickness="1.5"
+                                Background="#1F2FB6FF" BorderBrush="#FF2FB6FF">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#332FB6FF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RegionGreen" BasedOn="{StaticResource RegionBtnBase}" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="10" BorderThickness="1.5"
+                                Background="#1F3BFF7A" BorderBrush="#FF3BFF7A">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#333BFF7A"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RegionPurple" BasedOn="{StaticResource RegionBtnBase}" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="10" BorderThickness="1.5"
+                                Background="#1FB14BFF" BorderBrush="#FFB14BFF">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#33B14BFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RegionOrange" BasedOn="{StaticResource RegionBtnBase}" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="10" BorderThickness="1.5"
+                                Background="#1FFFA23B" BorderBrush="#FFFFA23B">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#33FFA23B"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ConsoleScroll" TargetType="ScrollViewer">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="16"/>
-            <RowDefinition/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <TextBlock Grid.Row="0" Text="SELECT REGION" Foreground="#992FB6FF"
+                   FontSize="13" FontWeight="SemiBold"/>
 
-
-        <UniformGrid Columns="4" Rows="1" Margin="-2,3,-2,3" Grid.Row="1" Grid.RowSpan="2">
-            <Button Content="GL" Margin="6,63,6,87" Click="Gl_Click"/>
-            <Button Content="KR" Margin="3,63,12,87" Click="Kr_Click"/>
-            <Button Content="VNG" Margin="-2,63,8,87" Click="Vng_Click"/>
-            <Button Content="TW" Margin="2,63,4,87" Click="Tw_Click"/>
+        <UniformGrid Grid.Row="2" Columns="4" Rows="1">
+            <Button Content="KR" Style="{StaticResource RegionBlue}" Margin="0,0,4,0" Click="Kr_Click"/>
+            <Button Content="GL" Style="{StaticResource RegionGreen}" Margin="4,0,4,0" Click="Gl_Click"/>
+            <Button Content="VNG" Style="{StaticResource RegionPurple}" Margin="4,0,4,0" Click="Vng_Click"/>
+            <Button Content="TW" Style="{StaticResource RegionOrange}" Margin="4,0,0,0" Click="Tw_Click"/>
         </UniformGrid>
+
+        <Border Grid.Row="4" CornerRadius="10" Background="#FF020408"
+                BorderBrush="#FF1A2436" BorderThickness="1">
+            <ScrollViewer x:Name="LogScroll" Style="{StaticResource ConsoleScroll}" Margin="10,8,10,8">
+                <StackPanel x:Name="LogPanel"/>
+            </ScrollViewer>
+        </Border>
+
+        <TextBlock Grid.Row="6" x:Name="StatusText" Text="Waiting for selection"
+                   Foreground="#FF5A6B80" FontSize="13" HorizontalAlignment="Center"/>
     </Grid>
 </Window>
