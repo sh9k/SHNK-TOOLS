@@ -793,30 +793,76 @@ namespace SHNK.Tools.App
                 return;
             }
 
+            var console =
+                new ConsoleLogWindow("CLEAR TEMP")
+                {
+                    Owner = this
+                };
+
+            console.Show();
+
             try
             {
+                string userTemp =
+                    Path.GetTempPath();
+
+                string systemTemp =
+                    @"C:\Windows\Temp";
+
+                console.AppendLog($"Target: {userTemp}");
+                console.AppendLog("Cleaning user %temp%...");
+
                 await Task.Run(
                     () =>
                     {
-                        string temp =
-                            Path.GetTempPath();
-
                         FileOps.SafeDeleteContents(
-                            temp
+                            userTemp
                         );
                     }
                 );
 
-                MessageBox.Show(
-                    "Temp cleared successfully.",
-                    "SHNK TOOLS"
+                console.AppendLog("User %temp% - DONE");
+
+                console.AppendLog($"Target: {systemTemp}");
+                console.AppendLog("Cleaning system Temp...");
+
+                await Task.Run(
+                    () =>
+                    {
+                        FileOps.SafeDeleteContents(
+                            systemTemp
+                        );
+                    }
                 );
+
+                console.AppendLog("System Temp - DONE");
+
+                Logger.Log(
+                    "ClearTemp completed (user + system)."
+                );
+
+                console.AppendLog("DONE");
+                console.SetStatus(
+                    "Temp cleared successfully",
+                    ConsoleLogWindow.GreenBrush
+                );
+
+                await Task.Delay(15000);
+
+                if (console.IsVisible)
+                    console.Close();
             }
             catch (Exception ex)
             {
                 Logger.Log(
                     "ClearTemp ERROR: " +
                     ex
+                );
+
+                console.AppendLog("[ERR] " + ex.Message);
+                console.SetStatus(
+                    "Failed - see log",
+                    ConsoleLogWindow.RedBrush
                 );
 
                 MessageBox.Show(

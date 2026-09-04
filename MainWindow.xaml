@@ -558,7 +558,7 @@
                     <TextBlock Foreground="#AAFFFFFF" FontSize="13" VerticalAlignment="Center">
                         <Run Text="System Status: "/>
                         <Run Text="Optimal" Foreground="#FF3BFF7A" FontWeight="Bold"/>
-                        <Run Text=" | Connected | v2.1.2"/>
+                        <Run Text=" | Connected | v2.1.3"/>
                     </TextBlock>
                 </StackPanel>
 
