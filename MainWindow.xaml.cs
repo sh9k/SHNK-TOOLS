@@ -35,9 +35,6 @@ namespace SHNK.Tools.App
             Logger.Log("SHNK TOOLS started.");
         }
 
-        // =========================================================
-        // DOWNLOAD WITH PROFESSIONAL PROGRESS WINDOW
-        // =========================================================
         private async Task<bool> DownloadWithProgressAsync(
             string title,
             string status,
@@ -117,9 +114,6 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================================================
-        // CLEAN DOWNLOAD FILES
-        // =========================================================
         private static void TryDeleteDownloadFiles(
             string destination)
         {
@@ -145,9 +139,6 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================================================
-        // EXTRACT EMBEDDED FILE
-        // =========================================================
         private string ExtractEmbeddedFile(
             string resourceName,
             string outputName)
@@ -199,9 +190,6 @@ namespace SHNK.Tools.App
             return outputPath;
         }
 
-        // =========================================================
-        // WINDOW
-        // =========================================================
         private void DragBar_MouseLeftButtonDown(
             object sender,
             MouseButtonEventArgs e)
@@ -226,9 +214,6 @@ namespace SHNK.Tools.App
             WindowState = WindowState.Minimized;
         }
 
-        // =========================================================
-        // CLEANER
-        // =========================================================
         private async void Cleaner_Click(
             object sender,
             RoutedEventArgs e)
@@ -242,6 +227,12 @@ namespace SHNK.Tools.App
             {
                 return;
             }
+
+            var console =
+                new ConsoleLogWindow("CLEAN GAMELOOP")
+                {
+                    Owner = this
+                };
 
             try
             {
@@ -269,48 +260,36 @@ namespace SHNK.Tools.App
                     "BAT PATH: " + bat
                 );
 
-                var psi =
-                    new ProcessStartInfo
-                    {
-                        FileName = "cmd.exe",
-                        Arguments = $"/k \"\"{bat}\"\"",
-                        UseShellExecute = true,
-                        CreateNoWindow = false,
-                        WorkingDirectory =
-                            Path.GetDirectoryName(bat) ??
-                            Environment.CurrentDirectory
-                    };
+                console.Show();
+                console.AppendLog("Running cleaner_gameloop.bat...");
 
-                var p =
-                    Process.Start(psi);
-
-                if (p == null)
-                {
-                    MessageBox.Show(
-                        "Failed to start BAT.",
-                        "SHNK TOOLS"
-                    );
-
-                    return;
-                }
-
-                await p.WaitForExitAsync();
-
-                Logger.Log(
-                    "Cleaner BAT ExitCode: " +
-                    p.ExitCode
+                await ScriptRunner.RunBatWithLiveLog(
+                    bat,
+                    console.AppendLog
                 );
 
-                MessageBox.Show(
-                    "Cleaner finished.",
-                    "SHNK TOOLS"
+                console.AppendLog("DONE");
+                console.SetStatus(
+                    "Cleaner finished successfully",
+                    ConsoleLogWindow.GreenBrush
                 );
+
+                await Task.Delay(15000);
+
+                if (console.IsVisible)
+                    console.Close();
             }
             catch (Exception ex)
             {
                 Logger.Log(
                     "Cleaner ERROR: " +
                     ex
+                );
+
+                console.AppendLog("[ERR] " + ex.Message);
+                console.SetStatus(
+                    "Failed - see log",
+                    ConsoleLogWindow.RedBrush
                 );
 
                 MessageBox.Show(
@@ -320,10 +299,7 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================================================
-        // FIX GL
-        // =========================================================
-        private void FixGl_Click(
+        private async void FixGl_Click(
             object sender,
             RoutedEventArgs e)
         {
@@ -339,6 +315,14 @@ namespace SHNK.Tools.App
 
                 return;
             }
+
+            var console =
+                new ConsoleLogWindow("FIX GL")
+                {
+                    Owner = this
+                };
+
+            console.Show();
 
             try
             {
@@ -438,6 +422,8 @@ namespace SHNK.Tools.App
                     );
 
                     copied++;
+
+                    console.AppendLog($"{fileName} - DONE");
                 }
 
                 string hostsPath =
@@ -446,23 +432,36 @@ namespace SHNK.Tools.App
                 if (File.Exists(hostsPath))
                 {
                     File.Delete(hostsPath);
+                    console.AppendLog("hosts (old) removed - DONE");
                 }
 
                 Logger.Log(
                     $"Fix GL completed. Files copied: {copied}"
                 );
 
-                MessageBox.Show(
-                    $"Fix GL Completed Successfully.\n\n" +
-                    $"Files Copied: {copied}",
-                    "SHNK TOOLS"
+                console.AppendLog($"Total files copied: {copied}");
+                console.AppendLog("DONE");
+                console.SetStatus(
+                    "Fix GL completed successfully",
+                    ConsoleLogWindow.GreenBrush
                 );
+
+                await Task.Delay(15000);
+
+                if (console.IsVisible)
+                    console.Close();
             }
             catch (UnauthorizedAccessException ex)
             {
                 Logger.Log(
                     "FixGL permission ERROR: " +
                     ex
+                );
+
+                console.AppendLog("[ERR] Access denied.");
+                console.SetStatus(
+                    "Failed - Access denied",
+                    ConsoleLogWindow.RedBrush
                 );
 
                 MessageBox.Show(
@@ -480,6 +479,12 @@ namespace SHNK.Tools.App
                     ex
                 );
 
+                console.AppendLog("[ERR] " + ex.Message);
+                console.SetStatus(
+                    "Failed - see log",
+                    ConsoleLogWindow.RedBrush
+                );
+
                 MessageBox.Show(
                     ex.ToString(),
                     "Error"
@@ -487,9 +492,6 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================================================
-        // FIX KR - DIRECT FILE INSTALL
-        // =========================================================
         private async void FixKr_Click(
             object sender,
             RoutedEventArgs e)
@@ -509,21 +511,31 @@ namespace SHNK.Tools.App
                 return;
             }
 
+            var console =
+                new ConsoleLogWindow("FIX KR")
+                {
+                    Owner = this
+                };
+
+            console.Show();
+
             try
             {
                 Logger.Log(
                     "Starting Fix KR..."
                 );
 
-                // =====================================================
-                // FIND GAMELOOP UI PATH
-                // =====================================================
-
                 string? uiPath =
                     GameLoopFinder.FindUiPath();
 
                 if (string.IsNullOrWhiteSpace(uiPath))
                 {
+                    console.AppendLog("[ERR] GameLoop UI path not found.");
+                    console.SetStatus(
+                        "Failed - GameLoop not found",
+                        ConsoleLogWindow.RedBrush
+                    );
+
                     MessageBox.Show(
                         "GameLoop path was not found.\n\n" +
                         "Please make sure GameLoop is installed.",
@@ -544,11 +556,9 @@ namespace SHNK.Tools.App
                     uiPath
                 );
 
-                Directory.CreateDirectory(uiPath);
+                console.AppendLog("GameLoop UI path found - DONE");
 
-                // =====================================================
-                // FILES TO INSTALL
-                // =====================================================
+                Directory.CreateDirectory(uiPath);
 
                 string[] uiFiles =
                 {
@@ -569,8 +579,6 @@ namespace SHNK.Tools.App
 
                 foreach (string fileName in uiFiles)
                 {
-                    // Find the resource by its ending rather than
-                    // relying on the exact root namespace.
                     string? resourceName =
                         resources.FirstOrDefault(
                             r =>
@@ -587,25 +595,19 @@ namespace SHNK.Tools.App
                             $"FIX KR resource missing: {fileName}"
                         );
 
+                        console.AppendLog($"[ERR] {fileName} - missing resource");
+
                         throw new Exception(
                             "Embedded resource not found:\n\n" +
                             fileName
                         );
                     }
 
-                    Logger.Log(
-                        $"FIX KR resource: {resourceName}"
-                    );
-
                     string destination =
                         Path.Combine(
                             uiPath,
                             fileName
                         );
-
-                    Logger.Log(
-                        $"Copying: {fileName}"
-                    );
 
                     using Stream? resourceStream =
                         asm.GetManifestResourceStream(
@@ -614,6 +616,8 @@ namespace SHNK.Tools.App
 
                     if (resourceStream == null)
                     {
+                        console.AppendLog($"[ERR] {fileName} - could not open resource");
+
                         throw new Exception(
                             "Could not open embedded resource:\n\n" +
                             resourceName
@@ -637,11 +641,9 @@ namespace SHNK.Tools.App
                     Logger.Log(
                         $"Copied successfully: {destination}"
                     );
-                }
 
-                // =====================================================
-                // HOSTS
-                // =====================================================
+                    console.AppendLog($"{fileName} - DONE");
+                }
 
                 string hostsPath =
                     @"C:\Windows\System32\drivers\etc\hosts";
@@ -658,14 +660,12 @@ namespace SHNK.Tools.App
                 if (string.IsNullOrWhiteSpace(
                     hostsResource))
                 {
+                    console.AppendLog("[ERR] hosts - missing resource");
+
                     throw new Exception(
                         "Embedded hosts resource not found."
                     );
                 }
-
-                Logger.Log(
-                    $"Hosts resource: {hostsResource}"
-                );
 
                 using Stream? hostsStream =
                     asm.GetManifestResourceStream(
@@ -674,6 +674,8 @@ namespace SHNK.Tools.App
 
                 if (hostsStream == null)
                 {
+                    console.AppendLog("[ERR] hosts - could not open resource");
+
                     throw new Exception(
                         "Could not open embedded hosts resource."
                     );
@@ -695,29 +697,36 @@ namespace SHNK.Tools.App
                     "Hosts file installed successfully."
                 );
 
-                // =====================================================
-                // CLEANUP / RESULT
-                // =====================================================
+                console.AppendLog("hosts - DONE");
 
-                MessageBox.Show(
-                    "Fix KR completed successfully!\n\n" +
-                    $"Files copied: {copied}/5\n" +
-                    "Hosts file installed successfully.\n\n" +
-                    "Please restart GameLoop.",
-                    "SHNK TOOLS",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
+                console.AppendLog($"Total files copied: {copied}/5");
+                console.AppendLog("Please restart GameLoop.");
+                console.AppendLog("DONE");
+                console.SetStatus(
+                    "Fix KR completed successfully",
+                    ConsoleLogWindow.GreenBrush
                 );
 
                 Logger.Log(
                     "Fix KR completed successfully."
                 );
+
+                await Task.Delay(15000);
+
+                if (console.IsVisible)
+                    console.Close();
             }
             catch (UnauthorizedAccessException ex)
             {
                 Logger.Log(
                     "Fix KR permission error: " +
                     ex
+                );
+
+                console.AppendLog("[ERR] Access denied.");
+                console.SetStatus(
+                    "Failed - Access denied",
+                    ConsoleLogWindow.RedBrush
                 );
 
                 MessageBox.Show(
@@ -733,6 +742,12 @@ namespace SHNK.Tools.App
                 Logger.Log(
                     "Fix KR IO error: " +
                     ex
+                );
+
+                console.AppendLog("[ERR] File in use.");
+                console.SetStatus(
+                    "Failed - file in use",
+                    ConsoleLogWindow.RedBrush
                 );
 
                 MessageBox.Show(
@@ -751,6 +766,12 @@ namespace SHNK.Tools.App
                     ex
                 );
 
+                console.AppendLog("[ERR] " + ex.Message);
+                console.SetStatus(
+                    "Failed - see log",
+                    ConsoleLogWindow.RedBrush
+                );
+
                 MessageBox.Show(
                     ex.ToString(),
                     "Fix KR Error",
@@ -760,9 +781,6 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================================================
-        // CLEAR TEMP
-        // =========================================================
         private async void ClearTemp_Click(
             object sender,
             RoutedEventArgs e)
@@ -808,9 +826,6 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================================================
-        // INSTALL 32
-        // =========================================================
         private async void Install32_Click(
             object sender,
             RoutedEventArgs e)
@@ -907,9 +922,6 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================================================
-        // FIX ERROR HAX
-        // =========================================================
         private const string FixErrorHaxUrl =
             "https://aka.ms/vs/16/release/vc_redist.x64.exe";
 
@@ -973,9 +985,6 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================================================
-        // AIO FIX
-        // =========================================================
         private const string AioFixUrl =
             "https://allinoneruntimes.org/files/aio-runtimes_v2.5.0.exe";
 
@@ -1039,9 +1048,6 @@ namespace SHNK.Tools.App
             }
         }
 
-        // =========================================================
-        // RESET GUEST
-        // =========================================================
         private void ResetGuest_Click(
             object sender,
             RoutedEventArgs e)
@@ -1099,9 +1105,6 @@ namespace SHNK.Tools.App
         }
 
 
-        // =========================================================
-        // CONFIRM
-        // =========================================================
         private static bool Confirm(
             string msg)
         {
@@ -1125,9 +1128,6 @@ namespace SHNK.Tools.App
         }
     }
 
-    // =========================================================
-    // APP SETTINGS
-    // =========================================================
     public sealed class AppSettings
     {
         public string? Emu32InstallerUrl

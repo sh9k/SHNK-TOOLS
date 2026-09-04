@@ -1,0 +1,44 @@
+<Window x:Class="SHNK.Tools.App.ConsoleLogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SHNK TOOLS"
+        Width="380" Height="340"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow"
+        Background="#FF060A14">
+
+    <Window.Resources>
+
+        <Style x:Key="ConsoleScroll" TargetType="ScrollViewer">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" x:Name="TitleText" Text="RUNNING"
+                   Foreground="#992FB6FF" FontSize="13" FontWeight="SemiBold"/>
+
+        <Border Grid.Row="2" CornerRadius="10" Background="#FF020408"
+                BorderBrush="#FF1A2436" BorderThickness="1">
+            <ScrollViewer x:Name="LogScroll" Style="{StaticResource ConsoleScroll}" Margin="10,8,10,8">
+                <StackPanel x:Name="LogPanel"/>
+            </ScrollViewer>
+        </Border>
+
+        <TextBlock Grid.Row="4" x:Name="StatusText" Text="Working..."
+                   Foreground="#FF5A6B80" FontSize="13" HorizontalAlignment="Center"/>
+    </Grid>
+</Window>
