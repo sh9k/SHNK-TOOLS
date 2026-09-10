@@ -35,6 +35,9 @@ namespace SHNK.Tools.App
             Logger.Log("SHNK TOOLS started.");
         }
 
+        // =========================================================
+        // DOWNLOAD WITH PROFESSIONAL PROGRESS WINDOW
+        // =========================================================
         private async Task<bool> DownloadWithProgressAsync(
             string title,
             string status,
@@ -114,6 +117,9 @@ namespace SHNK.Tools.App
             }
         }
 
+        // =========================================================
+        // CLEAN DOWNLOAD FILES
+        // =========================================================
         private static void TryDeleteDownloadFiles(
             string destination)
         {
@@ -139,6 +145,9 @@ namespace SHNK.Tools.App
             }
         }
 
+        // =========================================================
+        // EXTRACT EMBEDDED FILE
+        // =========================================================
         private string ExtractEmbeddedFile(
             string resourceName,
             string outputName)
@@ -190,6 +199,9 @@ namespace SHNK.Tools.App
             return outputPath;
         }
 
+        // =========================================================
+        // WINDOW
+        // =========================================================
         private void DragBar_MouseLeftButtonDown(
             object sender,
             MouseButtonEventArgs e)
@@ -214,6 +226,9 @@ namespace SHNK.Tools.App
             WindowState = WindowState.Minimized;
         }
 
+        // =========================================================
+        // CLEANER
+        // =========================================================
         private async void Cleaner_Click(
             object sender,
             RoutedEventArgs e)
@@ -299,6 +314,9 @@ namespace SHNK.Tools.App
             }
         }
 
+        // =========================================================
+        // FIX GL
+        // =========================================================
         private async void FixGl_Click(
             object sender,
             RoutedEventArgs e)
@@ -426,13 +444,59 @@ namespace SHNK.Tools.App
                     console.AppendLog($"{fileName} - DONE");
                 }
 
+                // =====================================================
+                // HOSTS (OLD FILE) - WITH RETRY لأن الملف ممكن يكون
+                // مقفول مؤقتاً من مضاد فيروسات / VPN / GameLoop نفسه
+                // =====================================================
+
                 string hostsPath =
                     @"C:\Windows\System32\drivers\etc\hosts";
 
                 if (File.Exists(hostsPath))
                 {
-                    File.Delete(hostsPath);
-                    console.AppendLog("hosts (old) removed - DONE");
+                    bool deleted = false;
+                    Exception? lastEx = null;
+
+                    for (int attempt = 1;
+                         attempt <= 4 && !deleted;
+                         attempt++)
+                    {
+                        try
+                        {
+                            File.Delete(hostsPath);
+                            deleted = true;
+                        }
+                        catch (IOException ex)
+                        {
+                            lastEx = ex;
+
+                            console.AppendLog(
+                                $"hosts is locked, retrying ({attempt}/4)..."
+                            );
+
+                            await Task.Delay(400);
+                        }
+                    }
+
+                    if (deleted)
+                    {
+                        console.AppendLog("hosts (old) removed - DONE");
+                    }
+                    else
+                    {
+                        console.AppendLog(
+                            "[WARN] hosts is locked by another process - skipped."
+                        );
+
+                        console.AppendLog(
+                            "Close antivirus / VPN / GameLoop and try again if needed."
+                        );
+
+                        Logger.Log(
+                            "FixGL: hosts file locked, deletion skipped. " +
+                            lastEx
+                        );
+                    }
                 }
 
                 Logger.Log(
@@ -492,6 +556,9 @@ namespace SHNK.Tools.App
             }
         }
 
+        // =========================================================
+        // FIX KR - DIRECT FILE INSTALL
+        // =========================================================
         private async void FixKr_Click(
             object sender,
             RoutedEventArgs e)
@@ -781,6 +848,9 @@ namespace SHNK.Tools.App
             }
         }
 
+        // =========================================================
+        // CLEAR TEMP
+        // =========================================================
         private async void ClearTemp_Click(
             object sender,
             RoutedEventArgs e)
@@ -872,6 +942,9 @@ namespace SHNK.Tools.App
             }
         }
 
+        // =========================================================
+        // INSTALL 32
+        // =========================================================
         private async void Install32_Click(
             object sender,
             RoutedEventArgs e)
@@ -968,6 +1041,9 @@ namespace SHNK.Tools.App
             }
         }
 
+        // =========================================================
+        // FIX ERROR HAX
+        // =========================================================
         private const string FixErrorHaxUrl =
             "https://aka.ms/vs/16/release/vc_redist.x64.exe";
 
@@ -1031,6 +1107,9 @@ namespace SHNK.Tools.App
             }
         }
 
+        // =========================================================
+        // AIO FIX
+        // =========================================================
         private const string AioFixUrl =
             "https://allinoneruntimes.org/files/aio-runtimes_v2.5.0.exe";
 
@@ -1094,6 +1173,9 @@ namespace SHNK.Tools.App
             }
         }
 
+        // =========================================================
+        // RESET GUEST
+        // =========================================================
         private void ResetGuest_Click(
             object sender,
             RoutedEventArgs e)
@@ -1151,6 +1233,9 @@ namespace SHNK.Tools.App
         }
 
 
+        // =========================================================
+        // CONFIRM
+        // =========================================================
         private static bool Confirm(
             string msg)
         {
@@ -1174,6 +1259,9 @@ namespace SHNK.Tools.App
         }
     }
 
+    // =========================================================
+    // APP SETTINGS
+    // =========================================================
     public sealed class AppSettings
     {
         public string? Emu32InstallerUrl
